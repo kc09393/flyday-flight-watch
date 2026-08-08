@@ -1,14 +1,14 @@
 # Flyday 機票智慧監控
 
-Flyday 是手機優先的機票巡價 PWA。網站由 GitHub Pages 提供，GitHub Actions 每 6 小時透過 Amadeus Flight Offers Search 查詢真實價格；達到目標價或低於近期平均 10% 時，可建立 GitHub Issue，並選擇發送 LINE 或 Email。
+Flyday 是手機優先的機票巡價 PWA。網站由 GitHub Pages 提供，GitHub Actions 每天透過 SerpApi Google Flights API 查詢真實價格；達到目標價或低於近期平均 10% 時，可建立 GitHub Issue，並選擇發送 LINE 或 Email。
 
 ## 已完成
 
 - 可安裝到手機主畫面的 PWA 與離線外殼
 - 桌機／手機響應式介面
 - 監控條件、目標價與歷史價格資料格式
-- Amadeus OAuth 與 Flight Offers Search 整合
-- 每 6 小時自動巡價的 GitHub Actions
+- SerpApi Google Flights API 整合
+- 每天自動巡價的 GitHub Actions
 - 目標價、近期平均與跌幅判斷
 - GitHub Issue、LINE Messaging API、Resend Email 通知
 - 選用 OpenAI Responses API 產生依據真實數字的簡短建議
@@ -18,8 +18,7 @@ Flyday 是手機優先的機票巡價 PWA。網站由 GitHub Pages 提供，GitH
 
 到 Repository → Settings → Secrets and variables → Actions 新增：
 
-- `AMADEUS_CLIENT_ID`
-- `AMADEUS_CLIENT_SECRET`
+- `SERPAPI_API_KEY`
 
 通知管道至少選一個：
 
@@ -33,6 +32,8 @@ Flyday 是手機優先的機票巡價 PWA。網站由 GitHub Pages 提供，GitH
 - Repository variable `OPENAI_MODEL`，預設為 `gpt-5.6-terra`
 
 所有 API 金鑰只放在 GitHub Secrets，不可寫入前端或提交到儲存庫。
+
+SerpApi 免費方案每月 250 次搜尋且限非商業用途。預設每日執行一次、最多處理 8 條監控航線，以避免超過免費額度；正式公開或上架 App 前需改用可商業使用的方案。
 
 ## 調整監控航線
 
