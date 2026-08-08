@@ -1,7 +1,7 @@
 {
   "status": "needs_configuration",
-  "provider": "Amadeus",
+  "provider": "Google Flights via SerpApi",
   "updatedAt": null,
-  "message": "請在 GitHub Secrets 設定 AMADEUS_CLIENT_ID 與 AMADEUS_CLIENT_SECRET。",
+  "message": "請在 GitHub Secrets 設定 SERPAPI_API_KEY。",
   "results": []
 }
