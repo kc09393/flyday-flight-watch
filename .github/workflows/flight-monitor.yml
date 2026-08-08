@@ -1,0 +1,45 @@
+name: Flight price monitor
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 23 * * *'
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: flight-price-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Check live flight prices
+        env:
+          SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
+          SERPAPI_MAX_DAILY_WATCHES: '8'
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_USER_ID: ${{ secrets.LINE_USER_ID }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+          ALERT_FROM: ${{ vars.ALERT_FROM }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/monitor-flights.mjs
+      - name: Publish refreshed price data
+        run: |
+          if [[ -n "$(git status --porcelain data/)" ]]; then
+            git config user.name "flyday-bot"
+            git config user.email "flyday-bot@users.noreply.github.com"
+            git add data/latest.json data/history.json
+            git commit -m "Update flight prices"
+            git push
+          fi
