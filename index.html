@@ -151,19 +151,25 @@
 
   <div class="modal-backdrop" id="watchModal" hidden>
     <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <div class="modal-head"><div><p class="section-kicker">NEW PRICE WATCH</p><h2 id="modalTitle">新增機票監控</h2></div><button class="close-modal" aria-label="關閉">×</button></div>
+      <div class="modal-head"><div><p class="section-kicker">新增監控</p><h2 id="modalTitle">想去哪裡？</h2><p class="modal-lead">填好地點、日期和預算，就完成了。</p></div><button class="close-modal" aria-label="關閉">×</button></div>
       <form id="watchForm">
-        <div class="trip-type"><button type="button" class="active">來回</button><button type="button">單程</button><button type="button">多城市</button></div>
-        <div class="field-grid route-fields">
-          <label><span>從哪裡出發</span><input id="fromInput" value="台北 TPE" required></label>
-          <button type="button" class="swap-button" id="swapBtn" aria-label="交換出發與抵達">⇄</button>
-          <label><span>想去哪裡</span><input id="toInput" placeholder="城市或機場" required></label>
+        <div class="simple-route">
+          <label class="simple-field"><span><b>1</b> 從哪裡出發</span><input id="fromInput" value="台北 TPE" list="cityList" autocomplete="off" required></label>
+          <span class="route-arrow" aria-hidden="true">↓</span>
+          <label class="simple-field"><span><b>2</b> 想去哪裡</span><input id="toInput" placeholder="直接輸入中文，例如：重慶" list="cityList" autocomplete="off" required></label>
         </div>
-        <div class="field-grid two-col"><label><span>去程日期</span><input id="departInput" type="date" value="2026-10-15" required></label><label><span>回程日期</span><input id="returnInput" type="date" value="2026-10-20" required></label></div>
-        <div class="field-grid two-col"><label><span>理想價格</span><div class="input-prefix"><b>NT$</b><input id="priceInput" type="number" placeholder="9,000" required></div></label><label><span>旅客 / 艙等</span><select><option>1 位・經濟艙</option><option>2 位・經濟艙</option><option>1 位・豪華經濟艙</option></select></label></div>
-        <label class="check-row"><input type="checkbox" checked><span><b>日期可以彈性 ± 3 天</b><small>通常可多找到 34% 的低價選項</small></span><i></i></label>
-        <button class="modal-submit" type="submit"><span>✦</span> 開始 AI 智慧巡價</button>
+        <div class="quick-cities" aria-label="常用目的地"><span>快速選：</span><button type="button" data-city="東京 NRT">東京</button><button type="button" data-city="大阪 KIX">大阪</button><button type="button" data-city="首爾 ICN">首爾</button><button type="button" data-city="曼谷 BKK">曼谷</button><button type="button" data-city="重慶 CKG">重慶</button></div>
+        <div class="simple-grid">
+          <label class="simple-field"><span><b>3</b> 去程</span><input id="departInput" type="date" required></label>
+          <label class="simple-field"><span>回程</span><input id="returnInput" type="date" required></label>
+        </div>
+        <label class="simple-field budget-field"><span><b>4</b> 多少錢以下通知我？</span><div class="input-prefix"><b>NT$</b><input id="priceInput" type="number" inputmode="numeric" min="1" placeholder="例如 10,000" required></div></label>
+        <p class="simple-note">預設：來回、1 位、經濟艙</p>
+        <button class="modal-submit" type="submit"><span>＋</span> 開始監控</button>
       </form>
+      <datalist id="cityList">
+        <option value="台北 TPE"><option value="高雄 KHH"><option value="東京 NRT"><option value="大阪 KIX"><option value="首爾 ICN"><option value="曼谷 BKK"><option value="重慶 CKG"><option value="香港 HKG"><option value="新加坡 SIN"><option value="沖繩 OKA"><option value="福岡 FUK"><option value="上海 PVG"><option value="北京 PEK"><option value="成都 CTU">
+      </datalist>
     </section>
   </div>
   <div class="toast" id="toast" role="status"><span>✓</span><div><strong>監控已建立</strong><small>有好價格時會立即通知你</small></div></div>

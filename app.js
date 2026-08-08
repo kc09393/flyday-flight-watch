@@ -9,7 +9,7 @@ try { saved = JSON.parse(localStorage.getItem('flyday-watches') || 'null'); }
 catch { localStorage.removeItem('flyday-watches'); }
 let watches = Array.isArray(saved) ? saved.map(watch => {
   if(watch.live || watch.sample) return watch;
-  if(watch.change === '開始追蹤') return { ...watch, change:'等待 API 啟用' };
+  if(['開始追蹤', '等待 API 啟用'].includes(watch.change)) return { ...watch, change:'等待雲端同步' };
   if(/[↓↑]|%/.test(watch.change || '')) return { ...watch, change:'範例價格', hit:false, up:false, sample:true };
   return watch;
 }) : defaultWatches;
@@ -48,28 +48,59 @@ setPageClock();
 renderWatches();
 
 const modal = $('#watchModal');
-function openModal(){ modal.hidden = false; setTimeout(()=>$('#toInput').focus(), 50); }
+function formatInputDate(date){
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+function setDefaultTravelDates(){
+  const departInput = $('#departInput');
+  const returnInput = $('#returnInput');
+  if(departInput.value && returnInput.value) return;
+  const depart = new Date();
+  depart.setDate(depart.getDate() + 30);
+  const back = new Date(depart);
+  back.setDate(back.getDate() + 7);
+  departInput.value = formatInputDate(depart);
+  returnInput.value = formatInputDate(back);
+  departInput.min = formatInputDate(new Date());
+  returnInput.min = formatInputDate(depart);
+}
+function openModal(){ modal.hidden = false; setDefaultTravelDates(); setTimeout(()=>$('#toInput').focus(), 50); }
 function closeModal(){ modal.hidden = true; }
 $$('[data-open-modal]').forEach(btn => btn.addEventListener('click', openModal));
 $('.close-modal').addEventListener('click', closeModal);
 modal.addEventListener('click', e => { if(e.target === modal) closeModal(); });
 document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
 
-$('#swapBtn').addEventListener('click', () => {
-  const from = $('#fromInput').value;
-  $('#fromInput').value = $('#toInput').value;
-  $('#toInput').value = from;
-});
-
-const cityCodes = { 台北:'TPE', 桃園:'TPE', 東京:'NRT', 大阪:'KIX', 首爾:'ICN', 曼谷:'BKK', 福岡:'FUK', 沖繩:'OKA', 香港:'HKG', 新加坡:'SIN', 河內:'HAN', 峴港:'DAD', 馬尼拉:'MNL', 胡志明:'SGN' };
+const cityCodes = {
+  台北:'TPE', 桃園:'TPE', 台中:'RMQ', 高雄:'KHH',
+  東京:'NRT', 大阪:'KIX', 京都:'KIX', 名古屋:'NGO', 札幌:'CTS', 福岡:'FUK', 沖繩:'OKA',
+  首爾:'ICN', 釜山:'PUS', 曼谷:'BKK', 清邁:'CNX', 普吉島:'HKT',
+  香港:'HKG', 澳門:'MFM', 新加坡:'SIN', 吉隆坡:'KUL',
+  河內:'HAN', 峴港:'DAD', 胡志明:'SGN', 馬尼拉:'MNL', 宿霧:'CEB',
+  重慶:'CKG', 上海:'PVG', 北京:'PEK', 成都:'CTU', 廣州:'CAN', 深圳:'SZX',
+  杭州:'HGH', 南京:'NKG', 武漢:'WUH', 西安:'XIY', 廈門:'XMN', 青島:'TAO',
+  Chongqing:'CKG', Tokyo:'NRT', Osaka:'KIX', Seoul:'ICN', Bangkok:'BKK'
+};
 function parseLocation(value){
   const cleaned = value.trim().replace(/[()]/g, ' ');
   const codeMatch = cleaned.toUpperCase().match(/\b([A-Z]{3})\b/);
   const city = cleaned.replace(/\b[A-Za-z]{3}\b/, '').trim() || codeMatch?.[1] || '';
-  const code = codeMatch?.[1] || cityCodes[city];
+  const matchedCity = Object.keys(cityCodes).find(name => name.toLowerCase() === city.toLowerCase());
+  const code = codeMatch?.[1] || cityCodes[matchedCity];
   return code ? { city, code } : null;
 }
-[$('#fromInput'), $('#toInput')].forEach(input => input.addEventListener('input', () => $('#toInput').setCustomValidity('')));
+$$('[data-city]').forEach(button => button.addEventListener('click', () => {
+  $('#toInput').value = button.dataset.city;
+  $('#toInput').setCustomValidity('');
+}));
+[$('#fromInput'), $('#toInput')].forEach(input => input.addEventListener('input', () => input.setCustomValidity('')));
+$('#departInput').addEventListener('change', () => {
+  $('#returnInput').min = $('#departInput').value;
+  $('#returnInput').setCustomValidity('');
+});
 $('#returnInput').addEventListener('input', () => $('#returnInput').setCustomValidity(''));
 
 $('#watchForm').addEventListener('submit', e => {
@@ -77,8 +108,9 @@ $('#watchForm').addEventListener('submit', e => {
   const fromInfo = parseLocation($('#fromInput').value);
   const toInfo = parseLocation($('#toInput').value);
   if(!fromInfo || !toInfo){
-    $('#toInput').setCustomValidity('請輸入城市或三碼機場代碼，例如：東京 NRT');
-    $('#toInput').reportValidity();
+    const invalidInput = !fromInfo ? $('#fromInput') : $('#toInput');
+    invalidInput.setCustomValidity('找不到這個城市，請點選下方的快速城市，或輸入中文城市名稱');
+    invalidInput.reportValidity();
     return;
   }
   $('#toInput').setCustomValidity('');
@@ -92,20 +124,15 @@ $('#watchForm').addEventListener('submit', e => {
   $('#returnInput').setCustomValidity('');
   const nights = Math.max(1, Math.round((back - depart) / 86400000));
   const dateFmt = d => `${d.getMonth()+1}/${String(d.getDate()).padStart(2,'0')}`;
-  watches.unshift({ icon:routeIcons[toInfo.code] || '🌏', from:fromInfo.code, fromCity:fromInfo.city, to:toInfo.code, toCity:toInfo.city, dates:`${dateFmt(depart)} — ${dateFmt(back)}・${nights} 晚`, price:Number($('#priceInput').value), change:'等待 API 啟用' });
+  watches.unshift({ icon:routeIcons[toInfo.code] || '🌏', from:fromInfo.code, fromCity:fromInfo.city, to:toInfo.code, toCity:toInfo.city, dates:`${dateFmt(depart)} — ${dateFmt(back)}・${nights} 晚`, price:Number($('#priceInput').value), change:'等待雲端同步' });
   renderWatches(); closeModal();
   $('#toast strong').textContent='已儲存在這台手機';
-  $('#toast small').textContent='接上航班 API 後才會開始自動巡價';
-  showToast(); e.target.reset();
+  $('#toast small').textContent='雲端同步功能完成後會自動開始巡價';
+  showToast(); e.target.reset(); setDefaultTravelDates();
 });
 
 function showToast(){ const toast=$('#toast'); toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 3200); }
 
-$('.check-row').addEventListener('click', e => {
-  if(e.target.tagName !== 'INPUT'){
-    const input=$('.check-row input'); input.checked=!input.checked; e.preventDefault();
-  }
-});
 
 const aiForm = $('#aiForm');
 $$('.prompt-chip').forEach(chip => chip.addEventListener('click', () => { $('#aiPrompt').value=chip.textContent; aiForm.requestSubmit(); }));
@@ -133,7 +160,7 @@ $('#viewFlightsBtn').addEventListener('click',()=>document.querySelector('#explo
 $('#menuBtn').addEventListener('click',()=>$('.sidebar').classList.toggle('open'));
 $$('.nav-item').forEach(link=>link.addEventListener('click',()=>{ $$('.nav-item').forEach(a=>a.classList.remove('active'));link.classList.add('active');$('.sidebar').classList.remove('open'); }));
 
-const routeIcons = { NRT:'🇯🇵', HND:'🇯🇵', KIX:'🇯🇵', FUK:'🇯🇵', OKA:'🇯🇵', CTS:'🇯🇵', ICN:'🇰🇷', GMP:'🇰🇷', BKK:'🇹🇭', DMK:'🇹🇭', HKG:'🇭🇰', SIN:'🇸🇬', HAN:'🇻🇳', DAD:'🇻🇳', SGN:'🇻🇳', MNL:'🇵🇭' };
+const routeIcons = { NRT:'🇯🇵', HND:'🇯🇵', KIX:'🇯🇵', FUK:'🇯🇵', OKA:'🇯🇵', CTS:'🇯🇵', NGO:'🇯🇵', ICN:'🇰🇷', GMP:'🇰🇷', PUS:'🇰🇷', BKK:'🇹🇭', DMK:'🇹🇭', CNX:'🇹🇭', HKT:'🇹🇭', HKG:'🇭🇰', MFM:'🇲🇴', SIN:'🇸🇬', KUL:'🇲🇾', HAN:'🇻🇳', DAD:'🇻🇳', SGN:'🇻🇳', MNL:'🇵🇭', CEB:'🇵🇭', CKG:'🇨🇳', PVG:'🇨🇳', PEK:'🇨🇳', CTU:'🇨🇳', CAN:'🇨🇳', SZX:'🇨🇳', HGH:'🇨🇳', NKG:'🇨🇳', WUH:'🇨🇳', XIY:'🇨🇳', XMN:'🇨🇳', TAO:'🇨🇳' };
 
 function displayDateRange(departureDate, returnDate){
   const short = value => {
