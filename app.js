@@ -20,6 +20,63 @@ const cityCodes = {
 };
 const cityByCode = Object.entries(cityCodes).reduce((map, [city, code]) => { if (!map[code]) map[code] = city; return map; }, {});
 const routeIcons = { NRT:'🇯🇵', KIX:'🇯🇵', FUK:'🇯🇵', OKA:'🇯🇵', CTS:'🇯🇵', NGO:'🇯🇵', ICN:'🇰🇷', PUS:'🇰🇷', BKK:'🇹🇭', CNX:'🇹🇭', HKT:'🇹🇭', HKG:'🇭🇰', MFM:'🇲🇴', SIN:'🇸🇬', KUL:'🇲🇾', HAN:'🇻🇳', DAD:'🇻🇳', SGN:'🇻🇳', MNL:'🇵🇭', CEB:'🇵🇭', CKG:'🇨🇳', PVG:'🇨🇳', PEK:'🇨🇳', CTU:'🇨🇳', CAN:'🇨🇳', SZX:'🇨🇳', HGH:'🇨🇳', NKG:'🇨🇳', WUH:'🇨🇳', XIY:'🇨🇳', XMN:'🇨🇳', TAO:'🇨🇳' };
+const routePriceBaselines = {
+  NRT:7000, KIX:6800, NGO:7200, CTS:9200, FUK:6500, OKA:6200,
+  ICN:6000, PUS:6500, BKK:8500, CNX:9000, HKT:9500,
+  HKG:5000, MFM:5200, SIN:9000, KUL:8500,
+  HAN:7800, DAD:7600, SGN:7600, MNL:6500, CEB:7200,
+  CKG:9500, PVG:7500, PEK:9500, CTU:10000, CAN:8000, SZX:8000,
+  HGH:8500, NKG:8800, WUH:9000, XIY:10000, XMN:7200, TAO:9000
+};
+
+function roundPrice(value) {
+  return Math.max(1000, Math.round(Number(value) / 100) * 100);
+}
+
+function seasonalMultiplier(dateValue) {
+  if (!dateValue) return 1;
+  const date = new Date(`${dateValue}T00:00:00`);
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  if ((month === 12 && day >= 20) || (month === 1 && day <= 5)) return 1.3;
+  if (month === 7 || month === 8) return 1.15;
+  if (month === 4 && day <= 10) return 1.12;
+  return 1;
+}
+
+function percentile(values, ratio) {
+  if (!values.length) return null;
+  const sorted = [...values].sort((a, b) => a - b);
+  return sorted[Math.floor((sorted.length - 1) * ratio)];
+}
+
+function estimateTargetPrice(watch) {
+  const current = Number(watch.current_price ?? watch.currentPrice);
+  const insights = watch.price_insights || watch.priceInsights || {};
+  const range = insights.typical_price_range || [];
+  const typicalLow = Number(range[0]);
+  const history = (insights.price_history || []).map(item => Number(Array.isArray(item) ? item[1] : item?.price)).filter(Number.isFinite);
+  const level = String(insights.price_level || '').toLowerCase();
+
+  if (Number.isFinite(current) && current > 0) {
+    if (level === 'low' || (Number.isFinite(typicalLow) && current <= typicalLow * 1.05)) return roundPrice(current);
+    const lowerQuartile = percentile(history, .25);
+    let estimate = Math.min(Number.isFinite(lowerQuartile) ? lowerQuartile : current * .92, current * .92);
+    if (Number.isFinite(typicalLow)) estimate = Math.max(typicalLow, estimate);
+    return roundPrice(estimate);
+  }
+
+  const baseline = routePriceBaselines[watch.destination] || 9000;
+  return roundPrice(baseline * seasonalMultiplier(watch.departure_date || watch.departureDate));
+}
+
+function estimateReason(watch) {
+  const insights = watch.price_insights || watch.priceInsights;
+  const current = Number(watch.current_price ?? watch.currentPrice);
+  if (insights?.typical_price_range?.length) return '依 Google Flights 常見區間與近期走勢估算';
+  if (Number.isFinite(current) && current > 0) return '依目前真實票價保守下修估算';
+  return '依航線與出發月份先估，首次巡價後會校正';
+}
 
 let publicResults = [];
 let cloudWatches = [];
@@ -61,7 +118,7 @@ function googleFlightsUrl(watch) {
 }
 
 function normalizePublic(item, index) {
-  return {
+  const watch = {
     id: item.id || `public-${index}`,
     origin: item.origin,
     origin_city: item.originCity || cityByCode[item.origin] || item.origin,
@@ -69,7 +126,6 @@ function normalizePublic(item, index) {
     destination_city: item.destinationCity || cityByCode[item.destination] || item.destination,
     departure_date: item.departureDate,
     return_date: item.returnDate,
-    target_price: Number(item.targetPrice),
     current_price: Number.isFinite(Number(item.currentPrice)) ? Number(item.currentPrice) : null,
     previous_price: null,
     offer_count: Number(item.offerCount || 0),
@@ -79,8 +135,11 @@ function normalizePublic(item, index) {
     nonstop: Boolean(item.nonStop),
     active: true,
     public: true,
+    price_insights: item.priceInsights || null,
     ai_advice: item.aiAdvice || null
   };
+  watch.target_price = Number(item.recommendedTargetPrice) || estimateTargetPrice(watch);
+  return watch;
 }
 
 function visibleWatches() {
@@ -88,7 +147,7 @@ function visibleWatches() {
 }
 
 function watchHit(watch) {
-  return Number.isFinite(Number(watch.current_price)) && Number(watch.current_price) <= Number(watch.target_price);
+  return Number.isFinite(Number(watch.current_price)) && Number(watch.current_price) <= estimateTargetPrice(watch);
 }
 
 function setPageClock() {
@@ -136,8 +195,9 @@ function renderWatches() {
   $('#watchGrid').innerHTML = watches.map(watch => {
     const hit = watchHit(watch);
     const hasPrice = Number.isFinite(Number(watch.current_price));
+    const recommendedPrice = estimateTargetPrice(watch);
     const statusClass = hit ? 'hit' : hasPrice ? 'live' : '';
-    const statusText = !watch.active ? '已暫停' : hit ? '達到目標價' : hasPrice ? '每日巡價中' : '等待首次巡價';
+    const statusText = !watch.active ? '已暫停' : hit ? '建議可以買' : hasPrice ? '每日巡價中' : '等待首次巡價';
     const ownerActions = currentSession && !watch.public ? `
       <div class="card-menu"><button data-action="edit" data-id="${escapeHTML(watch.id)}">編輯</button><button class="danger" data-action="delete" data-id="${escapeHTML(watch.id)}">刪除</button></div>` : '';
     const secondaryAction = currentSession && !watch.public
@@ -146,21 +206,19 @@ function renderWatches() {
     return `<article class="watch-card ${watch.active ? '' : 'paused'}">
       <div class="watch-status-row"><span class="status-pill ${statusClass}">${statusText}</span>${ownerActions}</div>
       <div class="route-title"><span class="flag">${routeIcons[watch.destination] || '🌏'}</span><div><h3>${escapeHTML(watch.origin_city)} → ${escapeHTML(watch.destination_city)}</h3><p>${escapeHTML(watch.origin)} → ${escapeHTML(watch.destination)}・${dateLabel(watch.departure_date)}－${dateLabel(watch.return_date)}</p></div></div>
-      <div class="price-row"><div class="price-main"><span>${hasPrice ? '目前最低・來回含稅' : '價格狀態'}</span><strong class="${hasPrice ? '' : 'pending'}">${money(watch.current_price)}</strong></div><div class="target-price"><span>通知價格</span><strong>${money(watch.target_price)}</strong></div></div>
+      <div class="price-row"><div class="price-main"><span>${hasPrice ? '目前最低・來回含稅' : '價格狀態'}</span><strong class="${hasPrice ? '' : 'pending'}">${money(watch.current_price)}</strong></div><div class="target-price"><span>Flyday 建議入手價</span><strong>${money(recommendedPrice)}</strong><small class="estimate-note">${escapeHTML(estimateReason(watch))}</small></div></div>
       <div class="card-actions"><a class="flight-link" href="${escapeHTML(googleFlightsUrl(watch))}" target="_blank" rel="noopener">查看 Google Flights</a>${secondaryAction}</div>
     </article>`;
   }).join('');
   $('#emptyState').hidden = watches.length > 0;
   const hitCount = watches.filter(watchHit).length;
-  $('#welcomeSummary').textContent = currentSession
-    ? `${watches.length} 條航線已同步到雲端${hitCount ? `，其中 ${hitCount} 條已達目標價。` : '，Flyday 會每天自動巡價。'}`
-    : `目前有 ${watches.length} 條公開真實巡價；登入後即可建立自己的跨裝置監控。`;
+  $('#welcomeSummary').textContent = `${watches.length} 個行程正在追蹤${hitCount ? `，${hitCount} 個已到建議入手價。` : '，價格夠低時再提醒你。'}`;
   renderAlerts();
 }
 
 function renderAlerts() {
   const hits = visibleWatches().filter(watch => watch.active && watchHit(watch));
-  $('#alertList').innerHTML = hits.map(watch => `<article class="alert-card"><span class="alert-icon">✦</span><div class="alert-copy"><strong>${escapeHTML(watch.origin_city)} → ${escapeHTML(watch.destination_city)} 已達標</strong><span>${fullDateLabel(watch.departure_date)} 出發・目前 ${money(watch.current_price)}・目標 ${money(watch.target_price)}</span></div><a href="${escapeHTML(googleFlightsUrl(watch))}" target="_blank" rel="noopener">查看航班</a></article>`).join('');
+  $('#alertList').innerHTML = hits.map(watch => `<article class="alert-card"><span class="alert-icon">✦</span><div class="alert-copy"><strong>${escapeHTML(watch.origin_city)} → ${escapeHTML(watch.destination_city)} 已到建議價</strong><span>${fullDateLabel(watch.departure_date)} 出發・目前 ${money(watch.current_price)}・建議入手 ${money(estimateTargetPrice(watch))}</span></div><a href="${escapeHTML(googleFlightsUrl(watch))}" target="_blank" rel="noopener">查看航班</a></article>`).join('');
   $('#alertEmpty').hidden = hits.length > 0;
   $('#alertCount').hidden = hits.length === 0;
   $('#mobileAlertCount').hidden = hits.length === 0;
@@ -177,7 +235,7 @@ function maybeNotify(hits) {
   hits.forEach(watch => {
     const key = `${watch.id}:${watch.current_price}:${watch.last_checked_at || ''}`;
     if (seen.has(key)) return;
-    new Notification(`Flyday：${watch.destination_city} 已達目標價`, { body:`目前 ${money(watch.current_price)}，你設定的是 ${money(watch.target_price)}`, icon:'./icon.svg' });
+    new Notification(`Flyday：${watch.destination_city} 已到建議價`, { body:`目前 ${money(watch.current_price)}，Flyday 建議入手價是 ${money(estimateTargetPrice(watch))}`, icon:'./icon.svg' });
     next.push(key);
   });
   localStorage.setItem('flyday-notified', JSON.stringify(next.slice(-50)));
@@ -240,7 +298,7 @@ async function loadCloudWatches({ seed = true } = {}) {
   if (!currentSession) return;
   const { data, error } = await cloudClient.from('flight_watches').select('*').order('created_at', { ascending:true });
   if (error) throw error;
-  cloudWatches = data || [];
+  cloudWatches = (data || []).map(watch => ({ ...watch, target_price:estimateTargetPrice(watch) }));
   if (seed && cloudWatches.length === 0 && publicResults.length) {
     await seedStarterWatches();
     return loadCloudWatches({ seed:false });
@@ -320,17 +378,38 @@ function openWatchModal(prefill = {}, editing = false) {
   $('#toInput').value = prefill.destination ? `${prefill.destination_city || cityByCode[prefill.destination] || prefill.destination} ${prefill.destination}` : '';
   $('#departInput').value = prefill.departure_date || defaults.departureDate;
   $('#returnInput').value = prefill.return_date || defaults.returnDate;
-  $('#priceInput').value = prefill.target_price || '';
+  $('#priceInput').value = '';
   $('#nonstopInput').checked = Boolean(prefill.nonstop);
   $('#departInput').min = formatInputDate(new Date());
   $('#returnInput').min = $('#departInput').value;
   $('#watchModalEyebrow').textContent = editing ? '編輯監控' : '新增監控';
   $('#watchModalTitle').textContent = editing ? '調整行程' : '想去哪裡？';
-  $('#watchSubmitButton').textContent = editing ? '儲存變更' : '開始監控';
+  $('#watchSubmitButton').textContent = editing ? '重新估價並儲存' : '自動估價並開始監控';
+  updateEstimatedPrice();
   $('#watchModal').hidden = false;
   setTimeout(() => $('#toInput').focus(), 60);
 }
 function closeWatchModal() { $('#watchModal').hidden = true; smartPrefill = null; }
+
+function updateEstimatedPrice() {
+  const destination = parseLocation($('#toInput').value);
+  if (!destination) {
+    $('#priceInput').value = '';
+    $('#estimatedPriceLabel').textContent = '選擇目的地後自動估算';
+    $('#estimateReason').textContent = '第一次巡價後會再依真實票價自動校正';
+    return;
+  }
+  const editingWatch = cloudWatches.find(item => String(item.id) === $('#watchId').value);
+  const matchingPublic = publicResults.find(item => item.destination === destination.code);
+  const priceReference = editingWatch || matchingPublic;
+  const estimateSource = priceReference
+    ? { ...priceReference, destination:destination.code, departure_date:$('#departInput').value }
+    : { destination:destination.code, departure_date:$('#departInput').value };
+  const estimate = estimateTargetPrice(estimateSource);
+  $('#priceInput').value = estimate;
+  $('#estimatedPriceLabel').textContent = money(estimate);
+  $('#estimateReason').textContent = estimateReason(estimateSource);
+}
 
 function readWatchForm() {
   const origin = parseLocation($('#fromInput').value);
@@ -354,7 +433,7 @@ function readWatchForm() {
     destination_city: destination.city,
     departure_date: $('#departInput').value,
     return_date: $('#returnInput').value,
-    target_price: Number($('#priceInput').value),
+    target_price: Number($('#priceInput').value) || estimateTargetPrice({ destination:destination.code, departure_date:$('#departInput').value }),
     nonstop: $('#nonstopInput').checked,
     active: true
   };
@@ -390,12 +469,12 @@ async function submitWatch(event) {
   try {
     await saveCloudWatch(watch);
     closeWatchModal();
-    showToast(watch.id ? '監控已更新' : '監控已建立', '最晚會在明天早上完成首次巡價');
+    showToast(watch.id ? '監控已重新估價' : '已建立智慧估價監控', '第一次取得真實票價後會自動校正');
   } catch (error) {
     showToast('儲存失敗', error.message, 'error');
   } finally {
     button.disabled = false;
-    button.textContent = watch.id ? '儲存變更' : '開始監控';
+    button.textContent = watch.id ? '重新估價並儲存' : '自動估價並開始監控';
   }
 }
 
@@ -518,11 +597,11 @@ function bindEvents() {
   document.addEventListener('keydown', event => { if (event.key === 'Escape') { closeWatchModal(); closeAuthModal(); } });
   $('#watchForm').addEventListener('submit', submitWatch);
   $('#authForm').addEventListener('submit', sendLoginLink);
-  $('#smartForm').addEventListener('submit', handleSmartSubmit);
+  $('#smartForm')?.addEventListener('submit', handleSmartSubmit);
   $$('.smart-chips button').forEach(button => button.addEventListener('click', () => { $('#smartPrompt').value = button.dataset.smart; $('#smartForm').requestSubmit(); }));
-  $$('.quick-cities button').forEach(button => button.addEventListener('click', () => { $('#toInput').value = button.dataset.city; $('#toInput').setCustomValidity(''); }));
-  [$('#fromInput'), $('#toInput')].forEach(input => input.addEventListener('input', () => input.setCustomValidity('')));
-  $('#departInput').addEventListener('change', () => { $('#returnInput').min = $('#departInput').value; $('#returnInput').setCustomValidity(''); });
+  $$('.quick-cities button').forEach(button => button.addEventListener('click', () => { $('#toInput').value = button.dataset.city; $('#toInput').setCustomValidity(''); updateEstimatedPrice(); }));
+  [$('#fromInput'), $('#toInput')].forEach(input => input.addEventListener('input', () => { input.setCustomValidity(''); updateEstimatedPrice(); }));
+  $('#departInput').addEventListener('change', () => { $('#returnInput').min = $('#departInput').value; $('#returnInput').setCustomValidity(''); updateEstimatedPrice(); });
   $('#returnInput').addEventListener('change', () => $('#returnInput').setCustomValidity(''));
   $('#watchGrid').addEventListener('click', handleWatchAction);
   $('#notificationButton').addEventListener('click', () => switchView('alerts'));

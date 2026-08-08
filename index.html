@@ -35,7 +35,7 @@
           <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><i id="notificationDot" hidden></i>
         </button>
         <button class="account-button" id="accountButton"><span class="avatar">KC</span><span id="accountLabel">登入同步</span></button>
-        <button class="primary-button" data-open-watch><span>＋</span> 新增監控</button>
+        <button class="primary-button" data-open-watch><span>＋</span> 找機票</button>
       </div>
     </header>
 
@@ -44,8 +44,8 @@
         <div class="hero">
           <div>
             <p class="eyebrow" id="todayLabel"></p>
-            <h1>不用一直查，<em>便宜時再出手。</em></h1>
-            <p id="welcomeSummary">正在連接最新票價…</p>
+            <h1>想去哪？<em>價格我來估。</em></h1>
+            <p id="welcomeSummary">選好行程，Flyday 會自動算出值得入手的價格。</p>
           </div>
           <div class="sync-card" id="syncCard">
             <span class="sync-dot"></span>
@@ -53,27 +53,26 @@
           </div>
         </div>
 
-        <section class="smart-card" aria-labelledby="smartTitle">
-          <div class="smart-heading"><span class="spark">✦</span><div><p>快速建立</p><h2 id="smartTitle">一句話告訴我想去哪</h2></div></div>
-          <form id="smartForm" class="smart-form">
-            <input id="smartPrompt" aria-label="輸入旅程需求" placeholder="例如：10 月 15 日去東京，五天，九千元內" autocomplete="off" />
-            <button type="submit">幫我填好</button>
-          </form>
-          <div class="smart-chips"><button type="button" data-smart="台北去東京，10月15日出發，玩5天，9000元內">東京 5 天</button><button type="button" data-smart="台北去大阪，週五出發玩3天，8000元內">大阪週末</button><button type="button" data-smart="台北去重慶，玩7天，16000元內">重慶 7 天</button></div>
-          <div class="smart-result" id="smartResult" hidden></div>
+        <section class="simple-start-card" aria-labelledby="startTitle">
+          <div>
+            <span class="simple-step">只填 3 項</span>
+            <h2 id="startTitle">目的地、去程、回程</h2>
+            <p>不用猜預算。Flyday 會參考真實票價區間，自動設定建議入手價。</p>
+          </div>
+          <button class="start-button" data-open-watch>開始找便宜機票 <span>→</span></button>
         </section>
 
         <section class="watch-section" aria-labelledby="watchTitle">
-          <div class="section-head"><div><p class="eyebrow">PRICE WATCH</p><h2 id="watchTitle">我的監控</h2></div><button class="text-button" id="refreshButton">↻ 重新整理</button></div>
+          <div class="section-head"><div><h2 id="watchTitle">正在幫你看的機票</h2><p>每天自動更新，不用重複搜尋</p></div><button class="text-button" id="refreshButton" aria-label="重新整理">↻</button></div>
           <div class="watch-grid" id="watchGrid" aria-live="polite"></div>
           <div class="empty-state" id="emptyState" hidden><span>✈</span><h3>還沒有監控行程</h3><p>建立第一條航線，Flyday 每天會幫你查一次。</p><button class="primary-button" data-open-watch>新增第一條監控</button></div>
         </section>
       </section>
 
       <section class="app-view" id="alertsView" data-view-panel="alerts" hidden>
-        <div class="page-head"><p class="eyebrow">ALERTS</p><h1>低價通知</h1><p>達到你設定的價格時，會集中顯示在這裡。</p></div>
+        <div class="page-head"><p class="eyebrow">ALERTS</p><h1>低價通知</h1><p>到達 Flyday 建議入手價時，會集中顯示在這裡。</p></div>
         <div class="alert-list" id="alertList"></div>
-        <div class="empty-state" id="alertEmpty"><span>🔔</span><h3>目前沒有新通知</h3><p>Flyday 每天早上巡價，達標後會出現在這裡。</p></div>
+        <div class="empty-state" id="alertEmpty"><span>🔔</span><h3>目前沒有新通知</h3><p>Flyday 每天早上巡價，到建議價後會出現在這裡。</p></div>
       </section>
 
       <section class="app-view" id="settingsView" data-view-panel="settings" hidden>
@@ -100,31 +99,35 @@
     </main>
 
     <nav class="bottom-nav" aria-label="手機導覽">
-      <button class="active" data-view="home"><span>⌂</span>監控</button>
-      <button data-view="alerts"><span>♢</span>通知 <i id="mobileAlertCount" hidden>0</i></button>
+      <button class="active" data-view="home"><span>⌂</span>機票</button>
       <button data-open-watch class="add-tab"><span>＋</span>新增</button>
       <button data-view="settings"><span>⚙</span>設定</button>
+      <i id="mobileAlertCount" hidden aria-hidden="true">0</i>
     </nav>
   </div>
 
   <div class="modal-backdrop" id="watchModal" hidden>
     <section class="modal" role="dialog" aria-modal="true" aria-labelledby="watchModalTitle">
-      <div class="modal-head"><div><p class="eyebrow" id="watchModalEyebrow">新增監控</p><h2 id="watchModalTitle">想去哪裡？</h2><p>四個步驟就完成。</p></div><button class="close-button" data-close-watch aria-label="關閉">×</button></div>
+      <div class="modal-head"><div><p class="eyebrow" id="watchModalEyebrow">新增監控</p><h2 id="watchModalTitle">想去哪裡？</h2><p>填好行程，價格交給 Flyday。</p></div><button class="close-button" data-close-watch aria-label="關閉">×</button></div>
       <form id="watchForm">
         <input type="hidden" id="watchId" />
         <div class="route-box">
-          <label class="form-field"><span><b>1</b> 從哪裡出發</span><input id="fromInput" value="台北 TPE" list="cityList" autocomplete="off" required /></label>
+          <label class="form-field"><span>從哪裡出發</span><input id="fromInput" value="台北 TPE" list="cityList" autocomplete="off" required /></label>
           <span class="route-down">↓</span>
-          <label class="form-field"><span><b>2</b> 想去哪裡</span><input id="toInput" placeholder="直接輸入中文，例如：重慶" list="cityList" autocomplete="off" required /></label>
+          <label class="form-field"><span>想去哪裡</span><input id="toInput" placeholder="例如：東京" list="cityList" autocomplete="off" required /></label>
         </div>
-        <div class="quick-cities" aria-label="常用目的地"><span>快速選：</span><button type="button" data-city="東京 NRT">東京</button><button type="button" data-city="大阪 KIX">大阪</button><button type="button" data-city="首爾 ICN">首爾</button><button type="button" data-city="曼谷 BKK">曼谷</button><button type="button" data-city="重慶 CKG">重慶</button></div>
         <div class="date-grid">
-          <label class="form-field"><span><b>3</b> 去程</span><input id="departInput" type="date" required /></label>
+          <label class="form-field"><span>去程</span><input id="departInput" type="date" required /></label>
           <label class="form-field"><span>回程</span><input id="returnInput" type="date" required /></label>
         </div>
-        <label class="form-field budget-field"><span><b>4</b> 多少錢以下通知我？</span><div class="money-input"><b>NT$</b><input id="priceInput" type="number" inputmode="numeric" min="1" max="1000000" placeholder="例如 10,000" required /></div></label>
+        <div class="estimate-box">
+          <span>Flyday 建議入手價</span>
+          <strong id="estimatedPriceLabel">選擇目的地後自動估算</strong>
+          <small id="estimateReason">第一次巡價後會再依真實票價自動校正</small>
+          <input id="priceInput" type="hidden" />
+        </div>
         <details class="advanced-options"><summary>進階選項</summary><label><input id="nonstopInput" type="checkbox" /> 只看直飛航班</label></details>
-        <button class="submit-button" id="watchSubmitButton" type="submit">開始監控</button>
+        <button class="submit-button" id="watchSubmitButton" type="submit">自動估價並開始監控</button>
       </form>
       <datalist id="cityList">
         <option value="台北 TPE"><option value="高雄 KHH"><option value="東京 NRT"><option value="大阪 KIX"><option value="首爾 ICN"><option value="釜山 PUS"><option value="曼谷 BKK"><option value="重慶 CKG"><option value="香港 HKG"><option value="新加坡 SIN"><option value="沖繩 OKA"><option value="福岡 FUK"><option value="上海 PVG"><option value="北京 PEK"><option value="成都 CTU">

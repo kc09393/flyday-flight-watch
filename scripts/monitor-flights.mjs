@@ -7,6 +7,51 @@ const API_BASE = process.env.SERPAPI_API_BASE || 'https://serpapi.com/search.jso
 const MAX_DAILY_SEARCHES = Math.max(1, Number(process.env.SERPAPI_MAX_DAILY_WATCHES) || 8);
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY;
+const ROUTE_BASELINES = {
+  NRT:7000, KIX:6800, NGO:7200, CTS:9200, FUK:6500, OKA:6200,
+  ICN:6000, PUS:6500, BKK:8500, CNX:9000, HKT:9500,
+  HKG:5000, MFM:5200, SIN:9000, KUL:8500, HAN:7800, DAD:7600,
+  SGN:7600, MNL:6500, CEB:7200, CKG:9500, PVG:7500, PEK:9500,
+  CTU:10000, CAN:8000, SZX:8000, HGH:8500, NKG:8800, WUH:9000,
+  XIY:10000, XMN:7200, TAO:9000
+};
+
+function roundPrice(value) {
+  return Math.max(1000, Math.round(Number(value) / 100) * 100);
+}
+
+function seasonalMultiplier(dateValue) {
+  if (!dateValue) return 1;
+  const date = new Date(`${dateValue}T00:00:00`);
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  if ((month === 12 && day >= 20) || (month === 1 && day <= 5)) return 1.3;
+  if (month === 7 || month === 8) return 1.15;
+  if (month === 4 && day <= 10) return 1.12;
+  return 1;
+}
+
+function percentile(values, ratio) {
+  if (!values.length) return null;
+  const sorted = [...values].sort((a, b) => a - b);
+  return sorted[Math.floor((sorted.length - 1) * ratio)];
+}
+
+function estimateTargetPrice(watch) {
+  const current = Number(watch.currentPrice);
+  const insights = watch.priceInsights || {};
+  const typicalLow = Number(insights.typical_price_range?.[0]);
+  const history = (insights.price_history || []).map(item => Number(Array.isArray(item) ? item[1] : item?.price)).filter(Number.isFinite);
+  const level = String(insights.price_level || '').toLowerCase();
+  if (Number.isFinite(current) && current > 0) {
+    if (level === 'low' || (Number.isFinite(typicalLow) && current <= typicalLow * 1.05)) return roundPrice(current);
+    const lowerQuartile = percentile(history, .25);
+    let estimate = Math.min(Number.isFinite(lowerQuartile) ? lowerQuartile : current * .92, current * .92);
+    if (Number.isFinite(typicalLow)) estimate = Math.max(typicalLow, estimate);
+    return roundPrice(estimate);
+  }
+  return roundPrice((ROUTE_BASELINES[watch.destination] || 9000) * seasonalMultiplier(watch.departureDate));
+}
 
 const readJson = async (path, fallback) => {
   try { return JSON.parse(await fs.readFile(path, 'utf8')); }
@@ -124,11 +169,17 @@ function groupWatches(watches) {
 }
 
 function expandResult(group, searchResult) {
-  return group.members.map(member => ({
-    ...member,
-    ...searchResult,
-    targetHit: searchResult.currentPrice ? searchResult.currentPrice <= member.targetPrice : false
-  }));
+  return group.members.map(member => {
+    const result = { ...member, ...searchResult };
+    const targetPrice = estimateTargetPrice(result);
+    return {
+      ...result,
+      targetPrice,
+      recommendedTargetPrice: targetPrice,
+      estimateBasis: result.priceInsights?.typical_price_range ? 'google_price_range' : 'route_baseline',
+      targetHit: result.currentPrice ? result.currentPrice <= targetPrice : false
+    };
+  });
 }
 
 function addInsights(results, history) {
@@ -169,6 +220,7 @@ async function syncCloudSuccess(result) {
     body:JSON.stringify({
       previous_price: result.previousCloudPrice,
       current_price: result.currentPrice,
+      target_price: result.targetPrice,
       offer_count: result.offerCount,
       provider: 'Google Flights via SerpApi',
       search_url: result.searchUrl,
