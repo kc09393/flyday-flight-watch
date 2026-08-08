@@ -155,7 +155,7 @@ async function hydrateLivePrices(){
     if(live.status === 'needs_configuration'){
       $('#dataStatus').textContent = 'Flyday beta・等待航班 API 憑證';
       $('#monitorStatusTitle').textContent = '準備啟用巡價';
-      $('#monitorStatusDetail').textContent = '補上航班 API 後每 6 小時更新';
+      $('#monitorStatusDetail').textContent = '補上航班 API 後每天更新';
       return;
     }
     if(!Array.isArray(live.results) || !live.results.length) return;
