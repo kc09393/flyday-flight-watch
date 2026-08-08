@@ -226,8 +226,12 @@ function renderWatches() {
     const hit = watchHit(watch);
     const hasPrice = hasRealPrice(watch.current_price);
     const recommendedPrice = estimateTargetPrice(watch);
+    const exactRoutePrices = isMonthWatch(watch)
+      ? watches.filter(item => !isMonthWatch(item) && item.origin === watch.origin && item.destination === watch.destination && hasRealPrice(item.current_price)).map(item => Number(item.current_price))
+      : [];
+    const flexibleSavings = hasPrice && exactRoutePrices.length ? Math.max(0, Math.min(...exactRoutePrices) - Number(watch.current_price)) : 0;
     const statusClass = hit ? 'hit' : hasPrice ? 'live' : '';
-    const statusText = !watch.active ? '已暫停' : hit ? '建議可以買' : hasPrice ? '每日巡價中' : '正在查最新票價';
+    const statusText = !watch.active ? '已暫停' : hit ? '建議可以買' : flexibleSavings > 0 ? `比固定日期省 ${money(flexibleSavings)}` : hasPrice ? '每日巡價中' : '正在查最新票價';
     const editAction = isMonthWatch(watch) ? '' : `<button data-action="edit" data-id="${escapeHTML(watch.id)}">編輯</button>`;
     const ownerActions = currentSession && !watch.public ? `
       <div class="card-menu">${editAction}<button class="danger" data-action="delete" data-id="${escapeHTML(watch.id)}">刪除</button></div>` : '';
