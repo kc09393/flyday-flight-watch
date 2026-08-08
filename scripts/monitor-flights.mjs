@@ -171,7 +171,7 @@ function flexibleMonthRange(travelMonth) {
 
 async function searchFlexibleWatch(apiKey, watch, settings) {
   const range = flexibleMonthRange(watch.travelMonth);
-  const duration = Number(watch.tripDaysMax) <= 5 ? '2' : Number(watch.tripDaysMin) >= 10 ? '3' : '1';
+  const duration = Number(watch.tripDaysMax) <= 5 ? '1' : Number(watch.tripDaysMin) >= 10 ? '3' : '2';
   const query = new URLSearchParams({
     engine: 'google_travel_explore',
     api_key: apiKey,
