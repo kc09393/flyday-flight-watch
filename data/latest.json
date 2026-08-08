@@ -1,7 +1,915 @@
 {
-  "status": "needs_configuration",
+  "status": "live",
   "provider": "Google Flights via SerpApi",
-  "updatedAt": null,
-  "message": "請在 GitHub Secrets 設定 SERPAPI_API_KEY。",
-  "results": []
+  "updatedAt": "2026-08-08T13:13:18.995Z",
+  "errors": [],
+  "results": [
+    {
+      "id": "tpe-nrt-20261015",
+      "origin": "TPE",
+      "originCity": "台北",
+      "destination": "NRT",
+      "destinationCity": "東京",
+      "departureDate": "2026-10-15",
+      "returnDate": "2026-10-20",
+      "targetPrice": 9000,
+      "nonStop": false,
+      "currentPrice": 7629,
+      "currency": "TWD",
+      "offerCount": 23,
+      "cheapestOffer": {
+        "id": "WyJDalJJYTFnNWRsVlVjRWxRV0VWQlNteGtVbWRDUnkwdExTMHRMUzB0YjNsamEyc3hNa0ZCUVVGQlIzQXpTekl3UmxaYU1tOUJFZ1ZVVWpnM05Cb0tDTTA3RUFBYUExUlhSRGdjY09lNEFRPT0iLFtbIlRQRSIsIjIwMjYtMTAtMTUiLCJOUlQiLG51bGwsIlRSIiwiODc0Il1dXQ==",
+        "price": 7629,
+        "currency": "TWD",
+        "validatingAirlines": [
+          "酷航"
+        ],
+        "itineraries": [
+          {
+            "durationMinutes": 210,
+            "segments": [
+              {
+                "carrier": "酷航",
+                "number": "TR 874",
+                "from": "TPE",
+                "departureAt": "2026-10-15 15:30",
+                "to": "NRT",
+                "arrivalAt": "2026-10-15 20:00",
+                "durationMinutes": 210,
+                "travelClass": "Economy"
+              }
+            ]
+          }
+        ]
+      },
+      "priceInsights": {
+        "lowest_price": 7629,
+        "price_level": "typical",
+        "typical_price_range": [
+          5700,
+          8900
+        ],
+        "price_history": [
+          [
+            1780934400,
+            7555
+          ],
+          [
+            1781020800,
+            7562
+          ],
+          [
+            1781107200,
+            7723
+          ],
+          [
+            1781193600,
+            7528
+          ],
+          [
+            1781280000,
+            8133
+          ],
+          [
+            1781366400,
+            11063
+          ],
+          [
+            1781452800,
+            11063
+          ],
+          [
+            1781539200,
+            11063
+          ],
+          [
+            1781625600,
+            6413
+          ],
+          [
+            1781712000,
+            6405
+          ],
+          [
+            1781798400,
+            7896
+          ],
+          [
+            1781884800,
+            7974
+          ],
+          [
+            1781971200,
+            7981
+          ],
+          [
+            1782057600,
+            7883
+          ],
+          [
+            1782144000,
+            7856
+          ],
+          [
+            1782230400,
+            7854
+          ],
+          [
+            1782316800,
+            7711
+          ],
+          [
+            1782403200,
+            7979
+          ],
+          [
+            1782489600,
+            7983
+          ],
+          [
+            1782576000,
+            7984
+          ],
+          [
+            1782662400,
+            7983
+          ],
+          [
+            1782748800,
+            11108
+          ],
+          [
+            1782835200,
+            8788
+          ],
+          [
+            1782921600,
+            8793
+          ],
+          [
+            1783008000,
+            10590
+          ],
+          [
+            1783094400,
+            10590
+          ],
+          [
+            1783180800,
+            10590
+          ],
+          [
+            1783267200,
+            10590
+          ],
+          [
+            1783353600,
+            10590
+          ],
+          [
+            1783440000,
+            10590
+          ],
+          [
+            1783526400,
+            11122
+          ],
+          [
+            1783612800,
+            11104
+          ],
+          [
+            1783699200,
+            11116
+          ],
+          [
+            1783785600,
+            8629
+          ],
+          [
+            1783872000,
+            8629
+          ],
+          [
+            1783958400,
+            8637
+          ],
+          [
+            1784044800,
+            11116
+          ],
+          [
+            1784131200,
+            11112
+          ],
+          [
+            1784217600,
+            10530
+          ],
+          [
+            1784304000,
+            10530
+          ],
+          [
+            1784390400,
+            10530
+          ],
+          [
+            1784476800,
+            10530
+          ],
+          [
+            1784563200,
+            10331
+          ],
+          [
+            1784649600,
+            10318
+          ],
+          [
+            1784736000,
+            8599
+          ],
+          [
+            1784822400,
+            7953
+          ],
+          [
+            1784908800,
+            7956
+          ],
+          [
+            1784995200,
+            7971
+          ],
+          [
+            1785081600,
+            7699
+          ],
+          [
+            1785168000,
+            7697
+          ],
+          [
+            1785254400,
+            7703
+          ],
+          [
+            1785340800,
+            7702
+          ],
+          [
+            1785427200,
+            7730
+          ],
+          [
+            1785513600,
+            7783
+          ],
+          [
+            1785600000,
+            7811
+          ],
+          [
+            1785686400,
+            7667
+          ],
+          [
+            1785772800,
+            7644
+          ],
+          [
+            1785859200,
+            7632
+          ],
+          [
+            1785945600,
+            7619
+          ],
+          [
+            1786032000,
+            7612
+          ],
+          [
+            1786118400,
+            7629
+          ]
+        ]
+      },
+      "searchUrl": "https://www.google.com/travel/flights?hl=zh-tw&gl=tw&curr=TWD&tfs=CBwQAhoeEgoyMDI2LTEwLTE1agcIARIDVFBFcgcIARIDTlJUGh4SCjIwMjYtMTAtMjBqBwgBEgNOUlRyBwgBEgNUUEVAAUgBcAGYAQE&tfu=EgIIAg",
+      "targetHit": true,
+      "checkedAt": "2026-08-08T13:13:18.995Z",
+      "average30d": null,
+      "priceVsAveragePct": null,
+      "changePct": null
+    },
+    {
+      "id": "tpe-icn-20261107",
+      "origin": "TPE",
+      "originCity": "台北",
+      "destination": "ICN",
+      "destinationCity": "首爾",
+      "departureDate": "2026-11-07",
+      "returnDate": "2026-11-11",
+      "targetPrice": 6500,
+      "nonStop": false,
+      "currentPrice": 6364,
+      "currency": "TWD",
+      "offerCount": 12,
+      "cheapestOffer": {
+        "id": "WyJDalJJYTFnNWRsVlVjRWxRV0VWQlNteGljVUZDUnkwdExTMHRMUzB0YjNsamEyc3hNa0ZCUVVGQlIzQXpTekpaVG5OTmJWZEJFZ1ZVVWpnM01ob0tDTnd4RUFBYUExUlhSRGdjY0pXYUFRPT0iLFtbIlRQRSIsIjIwMjYtMTEtMDciLCJJQ04iLG51bGwsIlRSIiwiODcyIl1dXQ==",
+        "price": 6364,
+        "currency": "TWD",
+        "validatingAirlines": [
+          "酷航"
+        ],
+        "itineraries": [
+          {
+            "durationMinutes": 150,
+            "segments": [
+              {
+                "carrier": "酷航",
+                "number": "TR 872",
+                "from": "TPE",
+                "departureAt": "2026-11-07 18:15",
+                "to": "ICN",
+                "arrivalAt": "2026-11-07 21:45",
+                "durationMinutes": 150,
+                "travelClass": "Economy"
+              }
+            ]
+          }
+        ]
+      },
+      "priceInsights": {
+        "lowest_price": 6364,
+        "price_level": "typical",
+        "typical_price_range": [
+          6000,
+          9300
+        ],
+        "price_history": [
+          [
+            1780934400,
+            6392
+          ],
+          [
+            1781020800,
+            6392
+          ],
+          [
+            1781107200,
+            6392
+          ],
+          [
+            1781193600,
+            6392
+          ],
+          [
+            1781280000,
+            6392
+          ],
+          [
+            1781366400,
+            6392
+          ],
+          [
+            1781452800,
+            6392
+          ],
+          [
+            1781539200,
+            6392
+          ],
+          [
+            1781625600,
+            6392
+          ],
+          [
+            1781712000,
+            6792
+          ],
+          [
+            1781798400,
+            6792
+          ],
+          [
+            1781884800,
+            6792
+          ],
+          [
+            1781971200,
+            6792
+          ],
+          [
+            1782057600,
+            6792
+          ],
+          [
+            1782144000,
+            6792
+          ],
+          [
+            1782230400,
+            6792
+          ],
+          [
+            1782316800,
+            6792
+          ],
+          [
+            1782403200,
+            6792
+          ],
+          [
+            1782489600,
+            6792
+          ],
+          [
+            1782576000,
+            6792
+          ],
+          [
+            1782662400,
+            6792
+          ],
+          [
+            1782748800,
+            5856
+          ],
+          [
+            1782835200,
+            5845
+          ],
+          [
+            1782921600,
+            5856
+          ],
+          [
+            1783008000,
+            5874
+          ],
+          [
+            1783094400,
+            5902
+          ],
+          [
+            1783180800,
+            5906
+          ],
+          [
+            1783267200,
+            5894
+          ],
+          [
+            1783353600,
+            5901
+          ],
+          [
+            1783440000,
+            5942
+          ],
+          [
+            1783526400,
+            5948
+          ],
+          [
+            1783612800,
+            5952
+          ],
+          [
+            1783699200,
+            5970
+          ],
+          [
+            1783785600,
+            5976
+          ],
+          [
+            1783872000,
+            5956
+          ],
+          [
+            1783958400,
+            5986
+          ],
+          [
+            1784044800,
+            5995
+          ],
+          [
+            1784131200,
+            5998
+          ],
+          [
+            1784217600,
+            6022
+          ],
+          [
+            1784304000,
+            6019
+          ],
+          [
+            1784390400,
+            6024
+          ],
+          [
+            1784476800,
+            6024
+          ],
+          [
+            1784563200,
+            5722
+          ],
+          [
+            1784649600,
+            6343
+          ],
+          [
+            1784736000,
+            6362
+          ],
+          [
+            1784822400,
+            5843
+          ],
+          [
+            1784908800,
+            6024
+          ],
+          [
+            1784995200,
+            6024
+          ],
+          [
+            1785081600,
+            5850
+          ],
+          [
+            1785168000,
+            5853
+          ],
+          [
+            1785254400,
+            6024
+          ],
+          [
+            1785340800,
+            6024
+          ],
+          [
+            1785427200,
+            6024
+          ],
+          [
+            1785513600,
+            6024
+          ],
+          [
+            1785600000,
+            6055
+          ],
+          [
+            1785686400,
+            6055
+          ],
+          [
+            1785772800,
+            6055
+          ],
+          [
+            1785859200,
+            6012
+          ],
+          [
+            1785945600,
+            6362
+          ],
+          [
+            1786032000,
+            6199
+          ],
+          [
+            1786118400,
+            6364
+          ]
+        ]
+      },
+      "searchUrl": "https://www.google.com/travel/flights?hl=zh-tw&gl=tw&curr=TWD&tfs=CBwQAhoeEgoyMDI2LTExLTA3agcIARIDVFBFcgcIARIDSUNOGh4SCjIwMjYtMTEtMTFqBwgBEgNJQ05yBwgBEgNUUEVAAUgBcAGYAQE&tfu=EgIIAg",
+      "targetHit": true,
+      "checkedAt": "2026-08-08T13:13:12.273Z",
+      "average30d": null,
+      "priceVsAveragePct": null,
+      "changePct": null
+    },
+    {
+      "id": "tpe-bkk-20261229",
+      "origin": "TPE",
+      "originCity": "台北",
+      "destination": "BKK",
+      "destinationCity": "曼谷",
+      "departureDate": "2026-12-29",
+      "returnDate": "2027-01-03",
+      "targetPrice": 12000,
+      "nonStop": false,
+      "currentPrice": 11441,
+      "currency": "TWD",
+      "offerCount": 19,
+      "cheapestOffer": {
+        "id": "WyJDalJJUTI4MWNWUm9NSE15T0ZGQlIwb3lWM2RDUnkwdExTMHRMUzB0ZG5kaWFIVXhNa0ZCUVVGQlIzQXpTekozUVVseFVYRkJFZ3REV0RRd04zeERXRFkxTXhvS0NMRlpFQUFhQTFSWFJEZ2NjSk9WQWc9PSIsW1siVFBFIiwiMjAyNi0xMi0yOSIsIkhLRyIsbnVsbCwiQ1giLCI0MDciXSxbIkhLRyIsIjIwMjYtMTItMjkiLCJCS0siLG51bGwsIkNYIiwiNjUzIl1dXQ==",
+        "price": 11441,
+        "currency": "TWD",
+        "validatingAirlines": [
+          "國泰航空"
+        ],
+        "itineraries": [
+          {
+            "durationMinutes": 405,
+            "segments": [
+              {
+                "carrier": "國泰航空",
+                "number": "CX 407",
+                "from": "TPE",
+                "departureAt": "2026-12-29 08:20",
+                "to": "HKG",
+                "arrivalAt": "2026-12-29 10:30",
+                "durationMinutes": 130,
+                "travelClass": "Economy"
+              },
+              {
+                "carrier": "國泰航空",
+                "number": "CX 653",
+                "from": "HKG",
+                "departureAt": "2026-12-29 12:00",
+                "to": "BKK",
+                "arrivalAt": "2026-12-29 14:05",
+                "durationMinutes": 185,
+                "travelClass": "Economy"
+              }
+            ]
+          }
+        ]
+      },
+      "priceInsights": {
+        "lowest_price": 11441,
+        "price_level": "high",
+        "typical_price_range": [
+          6000,
+          9900
+        ],
+        "price_history": [
+          [
+            1780934400,
+            13671
+          ],
+          [
+            1781020800,
+            13680
+          ],
+          [
+            1781107200,
+            13680
+          ],
+          [
+            1781193600,
+            13683
+          ],
+          [
+            1781280000,
+            13694
+          ],
+          [
+            1781366400,
+            13699
+          ],
+          [
+            1781452800,
+            13699
+          ],
+          [
+            1781539200,
+            13699
+          ],
+          [
+            1781625600,
+            13684
+          ],
+          [
+            1781712000,
+            13684
+          ],
+          [
+            1781798400,
+            13685
+          ],
+          [
+            1781884800,
+            13697
+          ],
+          [
+            1781971200,
+            13697
+          ],
+          [
+            1782057600,
+            13697
+          ],
+          [
+            1782144000,
+            13697
+          ],
+          [
+            1782230400,
+            13698
+          ],
+          [
+            1782316800,
+            13690
+          ],
+          [
+            1782403200,
+            13690
+          ],
+          [
+            1782489600,
+            13706
+          ],
+          [
+            1782576000,
+            13723
+          ],
+          [
+            1782662400,
+            13723
+          ],
+          [
+            1782748800,
+            13723
+          ],
+          [
+            1782835200,
+            11394
+          ],
+          [
+            1782921600,
+            12110
+          ],
+          [
+            1783008000,
+            12109
+          ],
+          [
+            1783094400,
+            13344
+          ],
+          [
+            1783180800,
+            13578
+          ],
+          [
+            1783267200,
+            13513
+          ],
+          [
+            1783353600,
+            13111
+          ],
+          [
+            1783440000,
+            13111
+          ],
+          [
+            1783526400,
+            13190
+          ],
+          [
+            1783612800,
+            10214
+          ],
+          [
+            1783699200,
+            10233
+          ],
+          [
+            1783785600,
+            10233
+          ],
+          [
+            1783872000,
+            10233
+          ],
+          [
+            1783958400,
+            10229
+          ],
+          [
+            1784044800,
+            10232
+          ],
+          [
+            1784131200,
+            9423
+          ],
+          [
+            1784217600,
+            9421
+          ],
+          [
+            1784304000,
+            9432
+          ],
+          [
+            1784390400,
+            9432
+          ],
+          [
+            1784476800,
+            9432
+          ],
+          [
+            1784563200,
+            9465
+          ],
+          [
+            1784649600,
+            9447
+          ],
+          [
+            1784736000,
+            9806
+          ],
+          [
+            1784822400,
+            9817
+          ],
+          [
+            1784908800,
+            9798
+          ],
+          [
+            1784995200,
+            9798
+          ],
+          [
+            1785081600,
+            9798
+          ],
+          [
+            1785168000,
+            9798
+          ],
+          [
+            1785254400,
+            9809
+          ],
+          [
+            1785340800,
+            9825
+          ],
+          [
+            1785427200,
+            9828
+          ],
+          [
+            1785513600,
+            10478
+          ],
+          [
+            1785600000,
+            11470
+          ],
+          [
+            1785686400,
+            11470
+          ],
+          [
+            1785772800,
+            11440
+          ],
+          [
+            1785859200,
+            11465
+          ],
+          [
+            1785945600,
+            11470
+          ],
+          [
+            1786032000,
+            11450
+          ],
+          [
+            1786118400,
+            11441
+          ]
+        ]
+      },
+      "searchUrl": "https://www.google.com/travel/flights?hl=zh-tw&gl=tw&curr=TWD&tfs=CBwQAhoeEgoyMDI2LTEyLTI5agcIARIDVFBFcgcIARIDQktLGh4SCjIwMjctMDEtMDNqBwgBEgNCS0tyBwgBEgNUUEVAAUgBcAGYAQE&tfu=EgIIAg",
+      "targetHit": true,
+      "checkedAt": "2026-08-08T13:13:16.368Z",
+      "average30d": null,
+      "priceVsAveragePct": null,
+      "changePct": null
+    }
+  ]
 }
