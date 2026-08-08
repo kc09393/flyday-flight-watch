@@ -1,7 +1,7 @@
 {
   "status": "live",
   "provider": "Google Flights via SerpApi",
-  "updatedAt": "2026-08-08T14:51:22.920Z",
+  "updatedAt": "2026-08-08T15:14:03.720Z",
   "errors": [],
   "results": [
     {
@@ -298,7 +298,7 @@
         ]
       },
       "searchUrl": "https://www.google.com/travel/flights?hl=zh-tw&gl=tw&curr=TWD&tfs=CBwQAhoeEgoyMDI2LTEwLTE1agcIARIDVFBFcgcIARIDTlJUGh4SCjIwMjYtMTAtMjBqBwgBEgNOUlRyBwgBEgNUUEVAAUgBcAGYAQE&tfu=EgIIAg",
-      "checkedAt": "2026-08-08T14:51:19.603Z",
+      "checkedAt": "2026-08-08T15:14:00.708Z",
       "recommendedTargetPrice": 7000,
       "estimateBasis": "google_price_range",
       "targetHit": false,
@@ -600,7 +600,7 @@
         ]
       },
       "searchUrl": "https://www.google.com/travel/flights?hl=zh-tw&gl=tw&curr=TWD&tfs=CBwQAhoeEgoyMDI2LTExLTA3agcIARIDVFBFcgcIARIDSUNOGh4SCjIwMjYtMTEtMTFqBwgBEgNJQ05yBwgBEgNUUEVAAUgBcAGYAQE&tfu=EgIIAg",
-      "checkedAt": "2026-08-08T14:51:17.632Z",
+      "checkedAt": "2026-08-08T15:14:00.717Z",
       "recommendedTargetPrice": 6000,
       "estimateBasis": "google_price_range",
       "targetHit": false,
@@ -659,13 +659,13 @@
       },
       "priceInsights": null,
       "searchUrl": "https://www.google.com/travel/flights?hl=zh-tw&gl=tw&curr=TWD&tfs=CBwQAhoeEgoyMDI2LTEyLTI5agcIARIDVFBFcgcIARIDQktLGh4SCjIwMjctMDEtMDNqBwgBEgNCS0tyBwgBEgNUUEVAAUgBcAGYAQE&tfu=EgIIAg",
-      "checkedAt": "2026-08-08T14:51:22.919Z",
+      "checkedAt": "2026-08-08T15:14:00.718Z",
       "recommendedTargetPrice": 8000,
       "estimateBasis": "route_baseline",
       "targetHit": false,
-      "average30d": 11441,
-      "priceVsAveragePct": -24.1,
-      "changePct": -24.1
+      "average30d": 10064,
+      "priceVsAveragePct": -13.7,
+      "changePct": 0
     }
   ]
 }
