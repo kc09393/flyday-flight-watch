@@ -59,10 +59,16 @@
             <p>不用登入，我會每天幫你看。</p>
           </div>
           <form class="quick-watch-form" id="quickWatchForm">
+            <div class="date-mode-switch" role="group" aria-label="日期方式">
+              <button type="button" class="active" data-date-mode="exact" aria-pressed="true">確定日期</button>
+              <button type="button" data-date-mode="month" aria-pressed="false">只知道月份</button>
+            </div>
             <label><span>出發地</span><select id="quickFromInput" required><option value="TPE">台北 TPE</option><option value="KHH" selected>高雄 KHH</option><option value="RMQ">台中 RMQ</option></select></label>
             <label><span>目的地</span><select id="quickToInput" required><option value="">請選擇</option><option value="CKG">重慶 CKG</option><option value="NRT">東京 NRT</option><option value="KIX">大阪 KIX</option><option value="ICN">首爾 ICN</option><option value="BKK">曼谷 BKK</option><option value="HKG">香港 HKG</option><option value="SIN">新加坡 SIN</option><option value="OKA">沖繩 OKA</option><option value="FUK">福岡 FUK</option><option value="PVG">上海 PVG</option><option value="PEK">北京 PEK</option><option value="CTU">成都 CTU</option></select></label>
-            <label><span>去程</span><input id="quickDepartInput" type="date" required /></label>
-            <label><span>回程</span><input id="quickReturnInput" type="date" required /></label>
+            <label class="exact-date-field"><span>去程</span><input id="quickDepartInput" type="date" required /></label>
+            <label class="exact-date-field"><span>回程</span><input id="quickReturnInput" type="date" required /></label>
+            <label class="month-date-field" hidden><span>哪一個月</span><input id="quickMonthInput" type="month" /></label>
+            <label class="month-date-field" hidden><span>大約玩幾天</span><select id="quickTripLengthInput"><option value="3,5">3～5 天</option><option value="6,9" selected>6～9 天</option><option value="10,14">10～14 天</option></select></label>
             <button type="submit" id="quickWatchButton">開始幫我找</button>
           </form>
         </section>

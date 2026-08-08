@@ -91,6 +91,10 @@ async function loadCloudWatches() {
     destinationCity: row.destination_city,
     departureDate: row.departure_date,
     returnDate: row.return_date,
+    searchMode: row.search_mode || 'exact',
+    travelMonth: row.travel_month,
+    tripDaysMin: row.trip_days_min,
+    tripDaysMax: row.trip_days_max,
     targetPrice: row.target_price,
     nonStop: row.nonstop,
     adults: row.adults || 1,
@@ -100,7 +104,7 @@ async function loadCloudWatches() {
   }));
 }
 
-async function searchWatch(apiKey, watch, settings) {
+async function searchExactWatch(apiKey, watch, settings) {
   const query = new URLSearchParams({
     engine: 'google_flights',
     api_key: apiKey,
@@ -155,8 +159,69 @@ async function searchWatch(apiKey, watch, settings) {
   };
 }
 
+function flexibleMonthRange(travelMonth) {
+  const [year, month] = String(travelMonth || '').slice(0, 7).split('-').map(Number);
+  if (!year || !month) throw new Error('Flexible watch is missing a valid travel month');
+  const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  return {
+    start:`${year}-${String(month).padStart(2, '0')}-01`,
+    end:`${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`
+  };
+}
+
+async function searchFlexibleWatch(apiKey, watch, settings) {
+  const range = flexibleMonthRange(watch.travelMonth);
+  const query = new URLSearchParams({
+    engine: 'google_flights_deals',
+    api_key: apiKey,
+    departure_id: watch.origin,
+    arrival_id: watch.destination,
+    outbound_date: `${range.start},${range.end}`,
+    trip_length: `${watch.tripDaysMin || 6},${watch.tripDaysMax || 9}`,
+    adults: String(watch.adults || settings.adults || 1),
+    currency: settings.currency || 'TWD',
+    gl: 'tw',
+    hl: 'zh-tw',
+    type: '1',
+    travel_class: '1',
+    stops: watch.nonStop ? '1' : '0'
+  });
+  const response = await fetch(`${API_BASE}?${query}`);
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(`${watch.origin}-${watch.destination} flexible search failed (${response.status}): ${payload.error || 'SerpApi request failed'}`);
+  if (payload.error) throw new Error(`${watch.origin}-${watch.destination} flexible search failed: ${payload.error}`);
+
+  const deals = [...(payload.deals || payload.destinations || [])]
+    .filter(deal => Number.isFinite(Number(deal.price)) && deal.start_date && deal.end_date)
+    .sort((a, b) => Number(a.price) - Number(b.price));
+  const cheapest = deals[0];
+  const average = Number(cheapest?.average_price);
+  return {
+    currentPrice: cheapest ? Number(cheapest.price) : null,
+    currency: settings.currency || 'TWD',
+    offerCount: deals.length,
+    cheapestOffer: cheapest || null,
+    priceInsights: Number.isFinite(average) && average > 0
+      ? { typical_price_range:[Math.round(average * .85), Math.round(average * 1.15)] }
+      : null,
+    searchUrl: cheapest?.flight_link || payload.search_metadata?.google_flights_deals_url || null,
+    departureDate: cheapest?.start_date || watch.departureDate,
+    returnDate: cheapest?.end_date || watch.returnDate,
+    checkedAt: new Date().toISOString()
+  };
+}
+
+function searchWatch(apiKey, watch, settings) {
+  return watch.searchMode === 'month'
+    ? searchFlexibleWatch(apiKey, watch, settings)
+    : searchExactWatch(apiKey, watch, settings);
+}
+
 function watchKey(watch) {
-  return [watch.origin, watch.destination, watch.departureDate, watch.returnDate, watch.nonStop ? 1 : 0, watch.adults || 1].join('|');
+  const dates = watch.searchMode === 'month'
+    ? [watch.travelMonth, watch.tripDaysMin, watch.tripDaysMax]
+    : [watch.departureDate, watch.returnDate];
+  return [watch.searchMode || 'exact', watch.origin, watch.destination, ...dates, watch.nonStop ? 1 : 0, watch.adults || 1].join('|');
 }
 
 function groupWatches(watches) {
@@ -197,25 +262,30 @@ function addInsights(results, history) {
 
 async function syncCloudSuccess(result) {
   const checkedAt = result.checkedAt || new Date().toISOString();
+  const updates = {
+    previous_price: result.previousCloudPrice,
+    current_price: result.currentPrice,
+    target_price: result.targetPrice,
+    offer_count: result.offerCount,
+    provider: result.searchMode === 'month' ? 'Google Flights Deals via SerpApi' : 'Google Flights via SerpApi',
+    search_url: result.searchUrl,
+    last_checked_at: checkedAt,
+    last_error: null
+  };
+  if (result.searchMode === 'month' && result.currentPrice) {
+    updates.departure_date = result.departureDate;
+    updates.return_date = result.returnDate;
+  }
   await supabaseRequest(`flight_watches?id=eq.${encodeURIComponent(result.id)}`, {
     method:'PATCH',
     headers:{ Prefer:'return=minimal' },
-    body:JSON.stringify({
-      previous_price: result.previousCloudPrice,
-      current_price: result.currentPrice,
-      target_price: result.targetPrice,
-      offer_count: result.offerCount,
-      provider: 'Google Flights via SerpApi',
-      search_url: result.searchUrl,
-      last_checked_at: checkedAt,
-      last_error: null
-    })
+    body:JSON.stringify(updates)
   });
   if (result.currentPrice) {
     await supabaseRequest('watch_prices', {
       method:'POST',
       headers:{ Prefer:'return=minimal' },
-      body:JSON.stringify({ watch_id:result.id, user_id:result.userId, price:result.currentPrice, checked_at:checkedAt, provider:'Google Flights via SerpApi' })
+      body:JSON.stringify({ watch_id:result.id, user_id:result.userId, price:result.currentPrice, checked_at:checkedAt, provider:updates.provider })
     });
   }
 }

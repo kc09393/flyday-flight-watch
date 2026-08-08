@@ -6,7 +6,7 @@ const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const escapeHTML = value => String(value ?? '').replace(/[&<>'"]/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' })[char]);
 const hasRealPrice = value => value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value)) && Number(value) > 0;
-const money = value => hasRealPrice(value) ? `NT$ ${Number(value).toLocaleString('zh-TW')}` : '等待首次巡價';
+const money = value => hasRealPrice(value) ? `NT$ ${Number(value).toLocaleString('zh-TW')}` : '正在查最新票價';
 const dateLabel = value => value ? new Intl.DateTimeFormat('zh-TW', { month:'numeric', day:'numeric' }).format(new Date(`${value}T00:00:00`)) : '';
 const fullDateLabel = value => value ? new Intl.DateTimeFormat('zh-TW', { year:'numeric', month:'numeric', day:'numeric' }).format(new Date(`${value}T00:00:00`)) : '';
 
@@ -103,6 +103,27 @@ function defaultDates(daysAway = 30, nights = 5) {
   return { departureDate: formatInputDate(departure), returnDate: formatInputDate(returning) };
 }
 
+function monthDateRange(monthValue) {
+  const [year, month] = String(monthValue || '').split('-').map(Number);
+  if (!year || !month) return null;
+  const start = new Date(year, month - 1, 1);
+  const end = new Date(year, month, 0);
+  return { start:formatInputDate(start), end:formatInputDate(end) };
+}
+
+function isMonthWatch(watch) {
+  return (watch.search_mode || watch.searchMode) === 'month';
+}
+
+function monthWatchLabel(watch, hasPrice = false) {
+  const monthValue = String(watch.travel_month || watch.travelMonth || '').slice(0, 7);
+  const [year, month] = monthValue.split('-');
+  const minDays = Number(watch.trip_days_min ?? watch.tripDaysMin);
+  const maxDays = Number(watch.trip_days_max ?? watch.tripDaysMax);
+  if (hasPrice) return `${Number(month)}月目前最便宜：${dateLabel(watch.departure_date)}－${dateLabel(watch.return_date)}`;
+  return `${year}年${Number(month)}月・玩 ${minDays}～${maxDays} 天`;
+}
+
 function parseLocation(value) {
   const cleaned = String(value || '').trim().replace(/[()]/g, ' ');
   const codeMatch = cleaned.toUpperCase().match(/\b([A-Z]{3})\b/);
@@ -137,6 +158,10 @@ function normalizePublic(item, index) {
     active: true,
     public: true,
     price_insights: item.priceInsights || null,
+    search_mode: item.searchMode || 'exact',
+    travel_month: item.travelMonth || null,
+    trip_days_min: item.tripDaysMin || null,
+    trip_days_max: item.tripDaysMax || null,
   };
   watch.target_price = Number(item.recommendedTargetPrice) || estimateTargetPrice(watch);
   return watch;
@@ -202,16 +227,17 @@ function renderWatches() {
     const hasPrice = hasRealPrice(watch.current_price);
     const recommendedPrice = estimateTargetPrice(watch);
     const statusClass = hit ? 'hit' : hasPrice ? 'live' : '';
-    const statusText = !watch.active ? '已暫停' : hit ? '建議可以買' : hasPrice ? '每日巡價中' : '等待首次巡價';
+    const statusText = !watch.active ? '已暫停' : hit ? '建議可以買' : hasPrice ? '每日巡價中' : '正在查最新票價';
+    const editAction = isMonthWatch(watch) ? '' : `<button data-action="edit" data-id="${escapeHTML(watch.id)}">編輯</button>`;
     const ownerActions = currentSession && !watch.public ? `
-      <div class="card-menu"><button data-action="edit" data-id="${escapeHTML(watch.id)}">編輯</button><button class="danger" data-action="delete" data-id="${escapeHTML(watch.id)}">刪除</button></div>` : '';
+      <div class="card-menu">${editAction}<button class="danger" data-action="delete" data-id="${escapeHTML(watch.id)}">刪除</button></div>` : '';
     const secondaryAction = currentSession && !watch.public
       ? `<button class="pause-button" data-action="pause" data-id="${escapeHTML(watch.id)}">${watch.active ? '暫停' : '啟用'}</button>`
       : `<button class="pause-button" data-action="copy-public" data-id="${escapeHTML(watch.id)}">加入我的</button>`;
     return `<article class="watch-card ${watch.active ? '' : 'paused'}">
       <div class="watch-status-row"><span class="status-pill ${statusClass}">${statusText}</span>${ownerActions}</div>
-      <div class="route-title"><span class="flag">${routeIcons[watch.destination] || '🌏'}</span><div><h3>${escapeHTML(watch.origin_city)} → ${escapeHTML(watch.destination_city)}</h3><p>${escapeHTML(watch.origin)} → ${escapeHTML(watch.destination)}・${dateLabel(watch.departure_date)}－${dateLabel(watch.return_date)}</p></div></div>
-      <div class="price-row"><div class="price-main"><span>${hasPrice ? '目前最低・來回含稅' : '價格狀態'}</span><strong class="${hasPrice ? '' : 'pending'}">${money(watch.current_price)}</strong></div><div class="target-price"><span>系統建議價</span><strong>${money(recommendedPrice)}</strong><small class="estimate-note">${escapeHTML(estimateReason(watch))}</small></div></div>
+      <div class="route-title"><span class="flag">${routeIcons[watch.destination] || '🌏'}</span><div><h3>${escapeHTML(watch.origin_city)} → ${escapeHTML(watch.destination_city)}</h3><p>${isMonthWatch(watch) ? escapeHTML(monthWatchLabel(watch, hasPrice)) : `${escapeHTML(watch.origin)} → ${escapeHTML(watch.destination)}・${dateLabel(watch.departure_date)}－${dateLabel(watch.return_date)}`}</p></div></div>
+      <div class="price-row"><div class="price-main"><span>${hasPrice ? (isMonthWatch(watch) ? '本月找到最低・來回含稅' : '目前最低・來回含稅') : '價格狀態'}</span><strong class="${hasPrice ? '' : 'pending'}">${money(watch.current_price)}</strong></div><div class="target-price"><span>系統建議價</span><strong>${money(recommendedPrice)}</strong><small class="estimate-note">${escapeHTML(estimateReason(watch))}</small></div></div>
       <div class="card-actions"><a class="flight-link" href="${escapeHTML(googleFlightsUrl(watch))}" target="_blank" rel="noopener">查看 Google Flights</a>${secondaryAction}</div>
     </article>`;
   }).join('');
@@ -281,6 +307,10 @@ function cloudPayloadFromWatch(watch) {
     destination_city: watch.destination_city,
     departure_date: watch.departure_date,
     return_date: watch.return_date,
+    search_mode: watch.search_mode || 'exact',
+    travel_month: watch.travel_month || null,
+    trip_days_min: watch.trip_days_min || null,
+    trip_days_max: watch.trip_days_max || null,
     target_price: Number(watch.target_price),
     currency: 'TWD',
     adults: 1,
@@ -377,12 +407,30 @@ async function sendLoginLink(event) {
   $('#authMessage').innerHTML = `確認信已寄到 <strong>${escapeHTML(email)}</strong>。打開信件中的按鈕，就能在其他裝置使用同一份監控。`;
 }
 
+function setQuickDateMode(mode) {
+  const isMonth = mode === 'month';
+  $$('[data-date-mode]').forEach(button => {
+    const active = button.dataset.dateMode === mode;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-pressed', String(active));
+  });
+  $$('.exact-date-field').forEach(field => { field.hidden = isMonth; });
+  $$('.month-date-field').forEach(field => { field.hidden = !isMonth; });
+  $('#quickDepartInput').required = !isMonth;
+  $('#quickReturnInput').required = !isMonth;
+  $('#quickMonthInput').required = isMonth;
+  $('#quickWatchButton').textContent = isMonth ? '找這個月最便宜' : '開始幫我找';
+}
+
 function setupQuickWatchForm() {
   const defaults = defaultDates(30, 5);
   $('#quickDepartInput').min = formatInputDate(new Date());
   $('#quickDepartInput').value = defaults.departureDate;
   $('#quickReturnInput').min = defaults.departureDate;
   $('#quickReturnInput').value = defaults.returnDate;
+  $('#quickMonthInput').min = formatInputDate(new Date()).slice(0, 7);
+  $('#quickMonthInput').value = defaults.departureDate.slice(0, 7);
+  setQuickDateMode('exact');
 }
 
 function readQuickWatchForm() {
@@ -394,12 +442,40 @@ function readQuickWatchForm() {
     invalid.reportValidity();
     return null;
   }
-  const departureDate = $('#quickDepartInput').value;
-  const returnDate = $('#quickReturnInput').value;
-  if (!departureDate || !returnDate || returnDate <= departureDate) {
-    $('#quickReturnInput').setCustomValidity('回程日期必須晚於去程日期');
-    $('#quickReturnInput').reportValidity();
-    return null;
+  const mode = $('[data-date-mode].active')?.dataset.dateMode || 'exact';
+  let departureDate;
+  let returnDate;
+  let travelMonth = null;
+  let tripDaysMin = null;
+  let tripDaysMax = null;
+  if (mode === 'month') {
+    travelMonth = $('#quickMonthInput').value;
+    const range = monthDateRange(travelMonth);
+    if (!range) {
+      $('#quickMonthInput').setCustomValidity('請選擇月份');
+      $('#quickMonthInput').reportValidity();
+      return null;
+    }
+    [tripDaysMin, tripDaysMax] = $('#quickTripLengthInput').value.split(',').map(Number);
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    departureDate = range.start > formatInputDate(tomorrow) ? range.start : formatInputDate(tomorrow);
+    if (departureDate > range.end) {
+      $('#quickMonthInput').setCustomValidity('這個月份已經過了，請選下一個月份');
+      $('#quickMonthInput').reportValidity();
+      return null;
+    }
+    const provisionalReturn = new Date(`${departureDate}T00:00:00`);
+    provisionalReturn.setDate(provisionalReturn.getDate() + tripDaysMin);
+    returnDate = formatInputDate(provisionalReturn);
+  } else {
+    departureDate = $('#quickDepartInput').value;
+    returnDate = $('#quickReturnInput').value;
+    if (!departureDate || !returnDate || returnDate <= departureDate) {
+      $('#quickReturnInput').setCustomValidity('回程日期必須晚於去程日期');
+      $('#quickReturnInput').reportValidity();
+      return null;
+    }
   }
   const reference = publicResults.find(item => item.origin === origin.code && item.destination === destination.code);
   const estimateSource = reference
@@ -412,6 +488,10 @@ function readQuickWatchForm() {
     destination_city:destination.city,
     departure_date:departureDate,
     return_date:returnDate,
+    search_mode:mode,
+    travel_month:travelMonth ? `${travelMonth}-01` : null,
+    trip_days_min:tripDaysMin,
+    trip_days_max:tripDaysMax,
     target_price:estimateTargetPrice(estimateSource),
     nonstop:false,
     active:true
@@ -433,7 +513,7 @@ async function handleQuickWatchSubmit(event) {
     showToast('儲存失敗', error.message, 'error');
   } finally {
     button.disabled = false;
-    button.textContent = '開始幫我找';
+    button.textContent = watch.search_mode === 'month' ? '找這個月最便宜' : '開始幫我找';
   }
 }
 
@@ -610,6 +690,7 @@ async function installApp() {
 
 function bindEvents() {
   $$('[data-view]').forEach(button => button.addEventListener('click', () => switchView(button.dataset.view)));
+  $$('[data-date-mode]').forEach(button => button.addEventListener('click', () => setQuickDateMode(button.dataset.dateMode)));
   $$('[data-view-link]').forEach(link => link.addEventListener('click', event => { event.preventDefault(); switchView(link.dataset.viewLink); }));
   $$('[data-open-watch]').forEach(button => button.addEventListener('click', () => openWatchModal()));
   $$('[data-close-watch]').forEach(button => button.addEventListener('click', closeWatchModal));
@@ -625,6 +706,7 @@ function bindEvents() {
   [$('#quickFromInput'), $('#quickToInput')].forEach(input => input.addEventListener('input', () => input.setCustomValidity('')));
   $('#quickDepartInput').addEventListener('change', () => { $('#quickReturnInput').min = $('#quickDepartInput').value; $('#quickReturnInput').setCustomValidity(''); });
   $('#quickReturnInput').addEventListener('change', () => $('#quickReturnInput').setCustomValidity(''));
+  $('#quickMonthInput').addEventListener('change', () => $('#quickMonthInput').setCustomValidity(''));
   $('#departInput').addEventListener('change', () => { $('#returnInput').min = $('#departInput').value; $('#returnInput').setCustomValidity(''); updateEstimatedPrice(); });
   $('#returnInput').addEventListener('change', () => $('#returnInput').setCustomValidity(''));
   $('#watchGrid').addEventListener('click', handleWatchAction);

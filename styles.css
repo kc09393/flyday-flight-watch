@@ -101,9 +101,14 @@ body{background:#fffaf6}
 .simple-form-heading p{font-size:11px;color:var(--muted);line-height:1.5}
 .simple-step{display:none}
 .quick-watch-form{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.date-mode-switch{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:4px;background:#f1f1ed;border-radius:12px;padding:4px;margin-bottom:2px}
+.date-mode-switch button{height:40px;border:0;border-radius:9px;background:transparent;color:#777e7a;font-size:12px;font-weight:700;box-shadow:none;margin:0;padding:0}
+.date-mode-switch button.active{background:#fff;color:var(--ink);box-shadow:0 3px 12px rgba(40,35,30,.08)}
 .quick-watch-form label>span{color:#6c736f;font-size:11px;margin:0 0 7px 2px}
 .quick-watch-form input,.quick-watch-form select{height:53px;background:#f5f5f1;border:1px solid transparent;border-radius:13px;padding:0 13px;font-size:13px}
 .quick-watch-form button{grid-column:1/-1;height:56px;border-radius:14px;margin-top:3px;font-size:14px;box-shadow:0 10px 24px rgba(255,104,69,.22)}
+.quick-watch-form .date-mode-switch button{grid-column:auto;height:40px;border-radius:9px;margin:0;padding:0;background:transparent;color:#777e7a;font-size:12px;box-shadow:none}
+.quick-watch-form .date-mode-switch button.active{background:#fff;color:var(--ink);box-shadow:0 3px 12px rgba(40,35,30,.08)}
 .watch-section{display:none;padding-top:34px}
 .watch-section.has-watches{display:block}
 .section-head h2{font-size:20px}
