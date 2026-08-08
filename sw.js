@@ -1,4 +1,4 @@
-const CACHE = 'flyday-v7';
+const CACHE = 'flyday-v8';
 const APP_SHELL = ['./', './index.html', './styles.css', './app.js', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', event => {

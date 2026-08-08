@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Flyday" />
-  <meta name="description" content="登入後跨裝置同步，每天自動查詢 Google Flights 真實票價。" />
+  <meta name="description" content="選好地點和日期，Flyday 每天自動查票價，便宜時再通知你。" />
   <title>Flyday 飛巡｜機票低價監控</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
@@ -44,8 +44,8 @@
         <div class="hero">
           <div>
             <p class="eyebrow" id="todayLabel"></p>
-            <h1>選好行程，<em>便宜再通知你。</em></h1>
-            <p id="welcomeSummary">輸入出發地、目的地和日期，就能開始監控。</p>
+            <h1>你想去哪裡？</h1>
+            <p id="welcomeSummary">選地點和日期，按一次就完成。</p>
           </div>
           <div class="sync-card" id="syncCard">
             <span class="sync-dot"></span>
@@ -55,23 +55,22 @@
 
         <section class="simple-start-card simple-form-card" aria-labelledby="startTitle">
           <div class="simple-form-heading">
-            <span class="simple-step">新增監控</span>
-            <h2 id="startTitle">選擇你的行程</h2>
-            <p>照順序填完四個欄位就好。</p>
+            <h2 id="startTitle">找便宜機票</h2>
+            <p>不用登入，我會每天幫你看。</p>
           </div>
           <form class="quick-watch-form" id="quickWatchForm">
             <label><span>出發地</span><select id="quickFromInput" required><option value="TPE">台北 TPE</option><option value="KHH" selected>高雄 KHH</option><option value="RMQ">台中 RMQ</option></select></label>
             <label><span>目的地</span><select id="quickToInput" required><option value="">請選擇</option><option value="CKG">重慶 CKG</option><option value="NRT">東京 NRT</option><option value="KIX">大阪 KIX</option><option value="ICN">首爾 ICN</option><option value="BKK">曼谷 BKK</option><option value="HKG">香港 HKG</option><option value="SIN">新加坡 SIN</option><option value="OKA">沖繩 OKA</option><option value="FUK">福岡 FUK</option><option value="PVG">上海 PVG</option><option value="PEK">北京 PEK</option><option value="CTU">成都 CTU</option></select></label>
             <label><span>去程</span><input id="quickDepartInput" type="date" required /></label>
             <label><span>回程</span><input id="quickReturnInput" type="date" required /></label>
-            <button type="submit" id="quickWatchButton">開始監控</button>
+            <button type="submit" id="quickWatchButton">開始幫我找</button>
           </form>
         </section>
 
         <section class="watch-section" aria-labelledby="watchTitle">
-          <div class="section-head"><div><h2 id="watchTitle">正在幫你看的機票</h2><p>每天自動更新，不用重複搜尋</p></div><button class="text-button" id="refreshButton" aria-label="重新整理">↻</button></div>
+          <div class="section-head"><div><h2 id="watchTitle">我的行程</h2><p>價格每天自動更新</p></div><button class="text-button" id="refreshButton" aria-label="重新整理">↻</button></div>
           <div class="watch-grid" id="watchGrid" aria-live="polite"></div>
-          <div class="empty-state" id="emptyState" hidden><span>✈</span><h3>還沒有監控行程</h3><p>建立第一條航線，Flyday 每天會幫你查一次。</p><button class="primary-button" data-open-watch>新增第一條監控</button></div>
+          <div class="empty-state" id="emptyState" hidden><p>填好上面四個欄位，就可以開始。</p><button class="primary-button" data-open-watch>新增第一條監控</button></div>
         </section>
       </section>
 
@@ -82,11 +81,11 @@
       </section>
 
       <section class="app-view" id="settingsView" data-view-panel="settings" hidden>
-        <div class="page-head"><p class="eyebrow">SETTINGS</p><h1>帳號與設定</h1><p>用同一個 Email 登入，手機和電腦就會共用監控清單。</p></div>
+        <div class="page-head"><p class="eyebrow">SETTINGS</p><h1>設定</h1><p>平常不需要碰這裡；要換裝置時再備份即可。</p></div>
         <div class="settings-grid">
           <article class="settings-card">
-            <div class="setting-icon">☁</div><div><h2>雲端同步</h2><p id="cloudAccountText">尚未登入，目前顯示公開巡價資料。</p></div>
-            <button class="dark-button" id="cloudAccountButton">使用 Email 登入</button>
+            <div class="setting-icon">☁</div><div><h2>跨裝置備份</h2><p id="cloudAccountText">現在不用登入就能使用；需要時可用 Email 備份。</p></div>
+            <button class="dark-button" id="cloudAccountButton">用 Email 備份</button>
           </article>
           <article class="settings-card">
             <div class="setting-icon">🔔</div><div><h2>瀏覽器通知</h2><p id="browserNotificationText">開啟後，當你使用 Flyday 時會跳出達標提醒。</p></div>
@@ -143,13 +142,13 @@
 
   <div class="modal-backdrop" id="authModal" hidden>
     <section class="modal auth-modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
-      <div class="modal-head"><div><p class="eyebrow">雲端同步</p><h2 id="authTitle">用 Email 登入</h2><p>不用密碼，我們會寄一封安全登入信給你。</p></div><button class="close-button" data-close-auth aria-label="關閉">×</button></div>
+      <div class="modal-head"><div><p class="eyebrow">跨裝置備份</p><h2 id="authTitle">留下 Email</h2><p>只有換手機或電腦時才需要。確認後，監控清單就能跟著你。</p></div><button class="close-button" data-close-auth aria-label="關閉">×</button></div>
       <form id="authForm">
         <label class="form-field"><span>Email</span><input id="emailInput" type="email" inputmode="email" autocomplete="email" placeholder="你的 Email" required /></label>
-        <button class="submit-button" id="authSubmitButton" type="submit">寄登入連結</button>
+        <button class="submit-button" id="authSubmitButton" type="submit">寄確認信</button>
       </form>
       <div class="auth-message" id="authMessage" hidden></div>
-      <p class="privacy-note">登入只用來同步你的監控，其他人看不到你的行程。</p>
+      <p class="privacy-note">Email 只用來備份你的監控，其他人看不到你的行程。</p>
     </section>
   </div>
 

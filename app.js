@@ -1,11 +1,12 @@
 const SUPABASE_URL = 'https://gumnsikbwvhogzawaoww.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_ltaNA7nnVozoSCOcZIjg';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_D7IATHoOU3zjQhpx8tFipQ_uld80_x6';
 const MAX_CLOUD_WATCHES = 5;
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const escapeHTML = value => String(value ?? '').replace(/[&<>'"]/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' })[char]);
-const money = value => Number.isFinite(Number(value)) ? `NT$ ${Number(value).toLocaleString('zh-TW')}` : '等待首次巡價';
+const hasRealPrice = value => value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value)) && Number(value) > 0;
+const money = value => hasRealPrice(value) ? `NT$ ${Number(value).toLocaleString('zh-TW')}` : '等待首次巡價';
 const dateLabel = value => value ? new Intl.DateTimeFormat('zh-TW', { month:'numeric', day:'numeric' }).format(new Date(`${value}T00:00:00`)) : '';
 const fullDateLabel = value => value ? new Intl.DateTimeFormat('zh-TW', { year:'numeric', month:'numeric', day:'numeric' }).format(new Date(`${value}T00:00:00`)) : '';
 
@@ -126,7 +127,7 @@ function normalizePublic(item, index) {
     destination_city: item.destinationCity || cityByCode[item.destination] || item.destination,
     departure_date: item.departureDate,
     return_date: item.returnDate,
-    current_price: Number.isFinite(Number(item.currentPrice)) ? Number(item.currentPrice) : null,
+    current_price: hasRealPrice(item.currentPrice) ? Number(item.currentPrice) : null,
     previous_price: null,
     offer_count: Number(item.offerCount || 0),
     provider: 'Google Flights via SerpApi',
@@ -142,11 +143,11 @@ function normalizePublic(item, index) {
 }
 
 function visibleWatches() {
-  return currentSession ? cloudWatches : publicResults;
+  return currentSession ? cloudWatches : [];
 }
 
 function watchHit(watch) {
-  return Number.isFinite(Number(watch.current_price)) && Number(watch.current_price) <= estimateTargetPrice(watch);
+  return hasRealPrice(watch.current_price) && Number(watch.current_price) <= estimateTargetPrice(watch);
 }
 
 function setPageClock() {
@@ -182,10 +183,15 @@ function setSyncState() {
 
 function updateAccountUI() {
   const email = currentSession?.user?.email;
-  $('#accountLabel').textContent = email ? email.split('@')[0] : '登入同步';
-  $('.avatar').textContent = email ? email.charAt(0).toUpperCase() : 'KC';
-  $('#cloudAccountText').textContent = email ? `已使用 ${email} 登入，監控清單會跨裝置同步。` : '尚未登入，目前顯示公開巡價資料。';
-  $('#cloudAccountButton').textContent = email ? '登出這台裝置' : '使用 Email 登入';
+  const isAnonymous = Boolean(currentSession?.user?.is_anonymous);
+  $('#accountLabel').textContent = '設定';
+  $('.avatar').textContent = '⚙';
+  $('#cloudAccountText').textContent = email
+    ? `已使用 ${email} 備份，手機和電腦可以共用監控清單。`
+    : isAnonymous
+      ? '現在不用登入就能使用。若要換手機或電腦，再用 Email 備份即可。'
+      : '目前先保存在這台裝置；需要時可用 Email 備份。';
+  $('#cloudAccountButton').textContent = email ? '登出這台裝置' : '用 Email 備份';
   setSyncState();
 }
 
@@ -193,7 +199,7 @@ function renderWatches() {
   const watches = visibleWatches();
   $('#watchGrid').innerHTML = watches.map(watch => {
     const hit = watchHit(watch);
-    const hasPrice = Number.isFinite(Number(watch.current_price));
+    const hasPrice = hasRealPrice(watch.current_price);
     const recommendedPrice = estimateTargetPrice(watch);
     const statusClass = hit ? 'hit' : hasPrice ? 'live' : '';
     const statusText = !watch.active ? '已暫停' : hit ? '建議可以買' : hasPrice ? '每日巡價中' : '等待首次巡價';
@@ -210,8 +216,11 @@ function renderWatches() {
     </article>`;
   }).join('');
   $('#emptyState').hidden = watches.length > 0;
+  $('.watch-section').classList.toggle('has-watches', watches.length > 0);
   const hitCount = watches.filter(watchHit).length;
-  $('#welcomeSummary').textContent = `${watches.length} 個行程正在追蹤${hitCount ? `，${hitCount} 個已到建議入手價。` : '，價格夠低時再提醒你。'}`;
+  $('#welcomeSummary').textContent = watches.length
+    ? `${watches.length} 個行程正在追蹤${hitCount ? `，${hitCount} 個已到建議入手價。` : '。'}`
+    : '選地點和日期，按一次就完成。';
   renderAlerts();
 }
 
@@ -278,7 +287,7 @@ function cloudPayloadFromWatch(watch) {
     cabin: 'economy',
     nonstop: Boolean(watch.nonstop),
     active: watch.active !== false,
-    current_price: Number.isFinite(Number(watch.current_price)) ? Number(watch.current_price) : null,
+    current_price: hasRealPrice(watch.current_price) ? Number(watch.current_price) : null,
     offer_count: Number(watch.offer_count || 0),
     provider: watch.provider || null,
     search_url: watch.search_url || null,
@@ -286,22 +295,11 @@ function cloudPayloadFromWatch(watch) {
   };
 }
 
-async function seedStarterWatches() {
-  if (!currentSession || cloudWatches.length || !publicResults.length) return;
-  const starters = publicResults.slice(0, 3).map(cloudPayloadFromWatch);
-  const { error } = await cloudClient.from('flight_watches').insert(starters);
-  if (error) throw error;
-}
-
-async function loadCloudWatches({ seed = true } = {}) {
+async function loadCloudWatches() {
   if (!currentSession) return;
   const { data, error } = await cloudClient.from('flight_watches').select('*').order('created_at', { ascending:true });
   if (error) throw error;
   cloudWatches = (data || []).map(watch => ({ ...watch, target_price:estimateTargetPrice(watch) }));
-  if (seed && cloudWatches.length === 0 && publicResults.length) {
-    await seedStarterWatches();
-    return loadCloudWatches({ seed:false });
-  }
   renderWatches();
 }
 
@@ -338,7 +336,13 @@ async function initCloud() {
   }
   cloudClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, { auth:{ persistSession:true, autoRefreshToken:true, detectSessionInUrl:true } });
   const { data } = await cloudClient.auth.getSession();
-  await handleSession(data.session);
+  let session = data.session;
+  if (!session) {
+    const { data:guestData, error:guestError } = await cloudClient.auth.signInAnonymously();
+    if (guestError) throw guestError;
+    session = guestData.session;
+  }
+  await handleSession(session);
   cloudClient.auth.onAuthStateChange((event, session) => {
     if (event === 'INITIAL_SESSION') return;
     setTimeout(() => handleSession(session), 0);
@@ -359,7 +363,10 @@ async function sendLoginLink(event) {
   button.disabled = true;
   button.textContent = '寄送中…';
   const redirect = `${location.origin}${location.pathname}`;
-  const { error } = await cloudClient.auth.signInWithOtp({ email, options:{ emailRedirectTo:redirect, shouldCreateUser:true } });
+  const isAnonymous = Boolean(currentSession?.user?.is_anonymous);
+  const { error } = isAnonymous
+    ? await cloudClient.auth.updateUser({ email }, { emailRedirectTo:redirect })
+    : await cloudClient.auth.signInWithOtp({ email, options:{ emailRedirectTo:redirect, shouldCreateUser:true } });
   button.disabled = false;
   button.textContent = '重新寄送登入連結';
   if (error) {
@@ -367,7 +374,7 @@ async function sendLoginLink(event) {
     return;
   }
   $('#authMessage').hidden = false;
-  $('#authMessage').innerHTML = `登入信已寄到 <strong>${escapeHTML(email)}</strong>。請打開信件並點擊連結，回來後就會自動同步。`;
+  $('#authMessage').innerHTML = `確認信已寄到 <strong>${escapeHTML(email)}</strong>。打開信件中的按鈕，就能在其他裝置使用同一份監控。`;
 }
 
 function setupQuickWatchForm() {
@@ -415,24 +422,18 @@ async function handleQuickWatchSubmit(event) {
   event.preventDefault();
   const watch = readQuickWatchForm();
   if (!watch) return;
-  if (!currentSession) {
-    localStorage.setItem('flyday-pending-watch', JSON.stringify(watch));
-    openAuthModal();
-    showToast('行程已填好', '登入後就會開始監控');
-    return;
-  }
   const button = $('#quickWatchButton');
   button.disabled = true;
   button.textContent = '儲存中…';
   try {
     await saveCloudWatch(watch);
-    showToast('監控已建立', watch.origin_city + ' → ' + watch.destination_city);
+    showToast('好了，我會每天幫你看', watch.origin_city + ' → ' + watch.destination_city);
     $('#quickToInput').value = '';
   } catch (error) {
     showToast('儲存失敗', error.message, 'error');
   } finally {
     button.disabled = false;
-    button.textContent = '開始監控';
+    button.textContent = '開始幫我找';
   }
 }
 
@@ -578,12 +579,11 @@ async function handleWatchAction(event) {
 }
 
 async function toggleAccount() {
-  if (!currentSession) return openAuthModal();
   switchView('settings');
 }
 
 async function accountSettingsAction() {
-  if (!currentSession) return openAuthModal();
+  if (!currentSession || currentSession.user.is_anonymous) return openAuthModal();
   if (!confirm('要登出這台裝置嗎？雲端監控不會被刪除。')) return;
   await cloudClient.auth.signOut({ scope:'local' });
   showToast('已登出', '你的雲端監控仍會繼續巡價');

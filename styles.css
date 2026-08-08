@@ -81,3 +81,56 @@
   .quick-watch-form label:nth-child(1),.quick-watch-form label:nth-child(2){grid-column:1/-1}
   .quick-watch-form input,.quick-watch-form select{height:47px;font-size:12px}
 }
+
+/* One-screen experience */
+body{background:#fffaf6}
+.app-header{height:64px;position:relative;padding:0 max(20px,calc((100vw - 680px)/2));background:transparent;border:0;backdrop-filter:none}
+.desktop-nav,.icon-button,.header-actions>.primary-button,.sync-card,.bottom-nav{display:none!important}
+.header-actions{margin-left:auto}
+.account-button{width:42px;height:42px;padding:0;justify-content:center;border:0;background:#f1f1ed;border-radius:50%}
+.account-button>span:last-child{display:none}
+.avatar{width:42px;height:42px;background:transparent;font-size:17px}
+.main-content{max-width:680px;padding:0 20px 70px}
+.hero{display:block;padding:44px 0 24px}
+.hero .eyebrow{display:none}
+.hero h1{font-size:42px;letter-spacing:-1.6px}
+.hero>div>p:last-child{font-size:14px;margin-top:9px}
+.simple-start-card,.simple-form-card{display:block;background:#fff;color:var(--ink);border:1px solid #eee9e2;border-radius:24px;padding:25px;box-shadow:0 16px 50px rgba(60,40,25,.07)}
+.simple-form-heading{margin-bottom:19px}
+.simple-form-heading h2{font-size:19px;margin:0 0 5px;letter-spacing:-.3px}
+.simple-form-heading p{font-size:11px;color:var(--muted);line-height:1.5}
+.simple-step{display:none}
+.quick-watch-form{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.quick-watch-form label>span{color:#6c736f;font-size:11px;margin:0 0 7px 2px}
+.quick-watch-form input,.quick-watch-form select{height:53px;background:#f5f5f1;border:1px solid transparent;border-radius:13px;padding:0 13px;font-size:13px}
+.quick-watch-form button{grid-column:1/-1;height:56px;border-radius:14px;margin-top:3px;font-size:14px;box-shadow:0 10px 24px rgba(255,104,69,.22)}
+.watch-section{display:none;padding-top:34px}
+.watch-section.has-watches{display:block}
+.section-head h2{font-size:20px}
+.section-head>div>p{font-size:10px}
+.watch-grid{max-width:none}
+.watch-card{border:1px solid #eee9e2;box-shadow:none}
+.empty-state{display:none}
+.page-head{padding-top:38px}
+.settings-grid{grid-template-columns:1fr}
+.toast{bottom:22px}
+@media(max-width:820px){
+  .app-header{height:58px;padding:0 15px}
+  .main-content{padding:0 15px 55px}
+  .hero{padding:30px 4px 20px}
+  .hero h1{font-size:34px}
+  .hero>div>p:last-child{font-size:13px}
+  .simple-start-card,.simple-form-card{padding:21px 17px;border-radius:21px}
+  .quick-watch-form{margin-top:0}
+  .watch-section{padding-top:30px}
+  .toast{bottom:14px}
+}
+@media(max-width:430px){
+  .hero h1{font-size:32px}
+  .quick-watch-form{grid-template-columns:1fr 1fr;gap:12px 9px}
+  .quick-watch-form label:nth-child(1),.quick-watch-form label:nth-child(2){grid-column:auto}
+  .quick-watch-form input,.quick-watch-form select{height:52px;font-size:12px}
+  .quick-watch-form button{height:55px}
+  .price-row{display:block}
+  .target-price{text-align:left;max-width:none;margin-top:13px}
+}
