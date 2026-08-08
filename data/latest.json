@@ -1,0 +1,7 @@
+{
+  "status": "needs_configuration",
+  "provider": "Amadeus",
+  "updatedAt": null,
+  "message": "請在 GitHub Secrets 設定 AMADEUS_CLIENT_ID 與 AMADEUS_CLIENT_SECRET。",
+  "results": []
+}

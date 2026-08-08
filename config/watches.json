@@ -1,0 +1,39 @@
+{
+  "currency": "TWD",
+  "adults": 1,
+  "watches": [
+    {
+      "id": "tpe-nrt-20261015",
+      "origin": "TPE",
+      "originCity": "台北",
+      "destination": "NRT",
+      "destinationCity": "東京",
+      "departureDate": "2026-10-15",
+      "returnDate": "2026-10-20",
+      "targetPrice": 9000,
+      "nonStop": false
+    },
+    {
+      "id": "tpe-icn-20261107",
+      "origin": "TPE",
+      "originCity": "台北",
+      "destination": "ICN",
+      "destinationCity": "首爾",
+      "departureDate": "2026-11-07",
+      "returnDate": "2026-11-11",
+      "targetPrice": 6500,
+      "nonStop": false
+    },
+    {
+      "id": "tpe-bkk-20261229",
+      "origin": "TPE",
+      "originCity": "台北",
+      "destination": "BKK",
+      "destinationCity": "曼谷",
+      "departureDate": "2026-12-29",
+      "returnDate": "2027-01-03",
+      "targetPrice": 12000,
+      "nonStop": false
+    }
+  ]
+}

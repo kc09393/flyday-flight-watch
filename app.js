@@ -23,6 +23,8 @@ function renderWatches(){
       <div class="watch-bottom"><div class="watch-price"><span>目前最低・來回含稅</span><strong>${formatPrice(w.price)}</strong></div><span class="price-change ${w.up?'up':''}">${w.change}</span></div>
     </article>`).join('');
   $('#watchCount').textContent = watches.length;
+  const welcomeCount = $('#welcomeCount');
+  if (welcomeCount) welcomeCount.textContent = watches.length;
   localStorage.setItem('flyday-watches', JSON.stringify(watches));
 }
 
@@ -87,3 +89,90 @@ $$('.round-arrow').forEach(btn=>btn.addEventListener('click',()=>{ $('#toast str
 $('#viewFlightsBtn').addEventListener('click',()=>document.querySelector('#explore').scrollIntoView({behavior:'smooth'}));
 $('#menuBtn').addEventListener('click',()=>$('.sidebar').classList.toggle('open'));
 $$('.nav-item').forEach(link=>link.addEventListener('click',()=>{ $$('.nav-item').forEach(a=>a.classList.remove('active'));link.classList.add('active');$('.sidebar').classList.remove('open'); }));
+
+const routeIcons = { NRT:'🇯🇵', HND:'🇯🇵', ICN:'🇰🇷', GMP:'🇰🇷', BKK:'🇹🇭', DMK:'🇹🇭' };
+
+function displayDateRange(departureDate, returnDate){
+  const short = value => {
+    const date = new Date(`${value}T00:00:00`);
+    return `${date.getMonth()+1}/${String(date.getDate()).padStart(2,'0')}`;
+  };
+  const nights = Math.max(1, Math.round((new Date(returnDate) - new Date(departureDate)) / 86400000));
+  return `${short(departureDate)} — ${short(returnDate)}・${nights} 晚`;
+}
+
+async function hydrateLivePrices(){
+  try {
+    const response = await fetch('./data/latest.json', { cache:'no-store' });
+    if(!response.ok) throw new Error(`HTTP ${response.status}`);
+    const live = await response.json();
+    if(live.updatedAt){
+      $('#lastUpdated').textContent = `最後更新 ${new Date(live.updatedAt).toLocaleString('zh-TW', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' })}`;
+    }
+    if(live.status === 'needs_configuration'){
+      $('#dataStatus').textContent = 'Flyday beta・等待航班 API 憑證';
+      return;
+    }
+    if(!Array.isArray(live.results) || !live.results.length) return;
+
+    live.results.forEach(result => {
+      const existing = watches.find(item => item.from === result.origin && item.to === result.destination);
+      const change = result.changePct === null || result.changePct === undefined
+        ? '最新報價'
+        : `${result.changePct <= 0 ? '↓' : '↑'} ${Math.abs(result.changePct)}%`;
+      const normalized = {
+        icon: routeIcons[result.destination] || '🌏',
+        from: result.origin,
+        fromCity: result.originCity,
+        to: result.destination,
+        toCity: result.destinationCity,
+        dates: displayDateRange(result.departureDate, result.returnDate),
+        price: result.currentPrice || result.targetPrice,
+        change,
+        hit: Boolean(result.targetHit),
+        up: Number(result.changePct) > 0,
+        aiAdvice: result.aiAdvice || null
+      };
+      if(existing) Object.assign(existing, normalized);
+      else watches.push(normalized);
+    });
+    renderWatches();
+    $('#dataStatus').textContent = live.status === 'partial' ? '真實票價・部分航線更新' : `真實票價・${live.provider || '航班 API'}`;
+    const featured = live.results.find(result => result.destination === 'NRT') || live.results[0];
+    if(featured?.currentPrice){
+      const chartPrice = $('.chart-meta strong');
+      if(chartPrice) chartPrice.textContent = formatPrice(featured.currentPrice);
+      const insight = $('.ai-insight p');
+      if(insight && featured.aiAdvice) insight.textContent = featured.aiAdvice;
+    }
+  } catch(error){
+    $('#dataStatus').textContent = navigator.onLine ? '暫時無法取得最新票價' : '離線模式・顯示上次資料';
+  }
+}
+
+hydrateLivePrices();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+}
+
+let deferredInstallPrompt;
+const installButton = $('#installAppBtn');
+window.addEventListener('beforeinstallprompt', event => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  installButton.hidden = false;
+});
+installButton?.addEventListener('click', async () => {
+  if(!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  installButton.hidden = true;
+});
+window.addEventListener('appinstalled', () => {
+  installButton.hidden = true;
+  $('#toast strong').textContent = 'Flyday 已安裝';
+  $('#toast small').textContent = '之後可以從手機主畫面直接開啟';
+  showToast();
+});

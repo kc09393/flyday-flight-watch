@@ -1,0 +1,6 @@
+cloudflared.exe
+cloudflared.*.log
+localtunnel.*.log
+localhostrun*.log
+lan-server.js
+.DS_Store

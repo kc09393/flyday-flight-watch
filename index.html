@@ -4,7 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#f5f4ef" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Flyday" />
   <title>飛巡 Flyday — 聰明等一張好機票</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -56,6 +61,7 @@
         <button class="mobile-menu" id="menuBtn" aria-label="開啟選單">☰</button>
         <div class="eyebrow">2026 年 8 月 8 日・星期六</div>
         <div class="top-actions">
+          <button class="install-button" id="installAppBtn" hidden>安裝 App</button>
           <button class="icon-button" aria-label="通知"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><i></i></button>
           <button class="primary-button" data-open-modal><span>＋</span> 新增監控</button>
         </div>
@@ -66,7 +72,7 @@
           <p class="section-kicker">早安，Kevin</p>
           <h1>今天也幫你盯著，<br><em>等一張好機票。</em></h1>
         </div>
-        <p class="welcome-copy">3 條航線正在巡價，其中 <strong>1 條出現近期低點</strong>。不用一直重整，值得買時我們會告訴你。</p>
+        <p class="welcome-copy"><span id="welcomeCount">3</span> 條航線正在巡價，其中 <strong>1 條出現近期低點</strong>。不用一直重整，值得買時我們會告訴你。</p>
       </section>
 
       <section class="ask-card" aria-labelledby="ask-title">
@@ -139,7 +145,7 @@
         </div>
       </section>
 
-      <footer><span>Flyday beta・價格僅供展示</span><span>資料每 4 小時更新一次</span></footer>
+      <footer><span id="dataStatus">Flyday beta・等待真實票價設定</span><span id="lastUpdated">資料每 6 小時更新一次</span></footer>
     </main>
   </div>
 
