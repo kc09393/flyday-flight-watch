@@ -4,14 +4,55 @@ const CONFIG_PATH = new URL('../config/watches.json', import.meta.url);
 const LATEST_PATH = new URL('../data/latest.json', import.meta.url);
 const HISTORY_PATH = new URL('../data/history.json', import.meta.url);
 const API_BASE = process.env.SERPAPI_API_BASE || 'https://serpapi.com/search.json';
-const MAX_DAILY_WATCHES = Math.max(1, Number(process.env.SERPAPI_MAX_DAILY_WATCHES) || 8);
+const MAX_DAILY_SEARCHES = Math.max(1, Number(process.env.SERPAPI_MAX_DAILY_WATCHES) || 8);
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY;
 
 const readJson = async (path, fallback) => {
   try { return JSON.parse(await fs.readFile(path, 'utf8')); }
   catch { return fallback; }
 };
-
 const writeJson = (path, data) => fs.writeFile(path, `${JSON.stringify(data, null, 2)}\n`, 'utf8');
+
+function supabaseHeaders(extra = {}) {
+  return {
+    apikey: SUPABASE_SECRET_KEY,
+    Authorization: `Bearer ${SUPABASE_SECRET_KEY}`,
+    'Content-Type': 'application/json',
+    ...extra
+  };
+}
+
+async function supabaseRequest(path, options = {}) {
+  if (!SUPABASE_URL || !SUPABASE_SECRET_KEY) throw new Error('Supabase backend is not configured');
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { ...options, headers:supabaseHeaders(options.headers) });
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`Supabase request failed (${response.status}): ${details.slice(0, 240)}`);
+  }
+  if (response.status === 204) return null;
+  return response.json().catch(() => null);
+}
+
+async function loadCloudWatches() {
+  if (!SUPABASE_URL || !SUPABASE_SECRET_KEY) return [];
+  const rows = await supabaseRequest('flight_watches?active=eq.true&select=*&order=created_at.asc');
+  return (rows || []).map(row => ({
+    id: row.id,
+    origin: row.origin,
+    originCity: row.origin_city,
+    destination: row.destination,
+    destinationCity: row.destination_city,
+    departureDate: row.departure_date,
+    returnDate: row.return_date,
+    targetPrice: row.target_price,
+    nonStop: row.nonstop,
+    adults: row.adults || 1,
+    userId: row.user_id,
+    previousCloudPrice: row.current_price,
+    source: 'cloud'
+  }));
+}
 
 async function searchWatch(apiKey, watch, settings) {
   const query = new URLSearchParams({
@@ -21,7 +62,7 @@ async function searchWatch(apiKey, watch, settings) {
     arrival_id: watch.destination,
     outbound_date: watch.departureDate,
     return_date: watch.returnDate,
-    adults: String(settings.adults || 1),
+    adults: String(watch.adults || settings.adults || 1),
     currency: settings.currency || 'TWD',
     gl: 'tw',
     hl: 'zh-tw',
@@ -32,14 +73,12 @@ async function searchWatch(apiKey, watch, settings) {
   });
   const response = await fetch(`${API_BASE}?${query}`);
   const payload = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    throw new Error(`${watch.id} search failed (${response.status}): ${payload.error || 'SerpApi request failed'}`);
-  }
-  if (payload.error) throw new Error(`${watch.id} search failed: ${payload.error}`);
+  if (!response.ok) throw new Error(`${watch.origin}-${watch.destination} search failed (${response.status}): ${payload.error || 'SerpApi request failed'}`);
+  if (payload.error) throw new Error(`${watch.origin}-${watch.destination} search failed: ${payload.error}`);
 
   const groups = [...(payload.best_flights || []), ...(payload.other_flights || [])];
   const offers = groups.map((offer, index) => ({
-    id: offer.departure_token || offer.booking_token || `${watch.id}-${index + 1}`,
+    id: offer.departure_token || offer.booking_token || `${watch.origin}-${watch.destination}-${index + 1}`,
     price: Number(offer.price),
     currency: settings.currency || 'TWD',
     validatingAirlines: [...new Set((offer.flights || []).map(segment => segment.airline).filter(Boolean))],
@@ -60,16 +99,36 @@ async function searchWatch(apiKey, watch, settings) {
 
   const cheapest = offers[0];
   return {
-    ...watch,
     currentPrice: cheapest?.price ?? null,
     currency: cheapest?.currency || settings.currency || 'TWD',
     offerCount: offers.length,
     cheapestOffer: cheapest || null,
     priceInsights: payload.price_insights || null,
     searchUrl: payload.search_metadata?.google_flights_url || null,
-    targetHit: cheapest ? cheapest.price <= watch.targetPrice : false,
     checkedAt: new Date().toISOString()
   };
+}
+
+function watchKey(watch) {
+  return [watch.origin, watch.destination, watch.departureDate, watch.returnDate, watch.nonStop ? 1 : 0, watch.adults || 1].join('|');
+}
+
+function groupWatches(watches) {
+  const groups = new Map();
+  for (const watch of watches) {
+    const key = watchKey(watch);
+    if (!groups.has(key)) groups.set(key, { query:watch, members:[] });
+    groups.get(key).members.push(watch);
+  }
+  return [...groups.values()];
+}
+
+function expandResult(group, searchResult) {
+  return group.members.map(member => ({
+    ...member,
+    ...searchResult,
+    targetHit: searchResult.currentPrice ? searchResult.currentPrice <= member.targetPrice : false
+  }));
 }
 
 function addInsights(results, history) {
@@ -77,74 +136,79 @@ function addInsights(results, history) {
     const routeHistory = history.filter(item => item.watchId === result.id && Number.isFinite(item.price));
     const recent = routeHistory.slice(-30);
     const average = recent.length ? recent.reduce((sum, item) => sum + item.price, 0) / recent.length : null;
-    const priceVsAveragePct = average && result.currentPrice
-      ? Number((((result.currentPrice - average) / average) * 100).toFixed(1))
-      : null;
+    const priceVsAveragePct = average && result.currentPrice ? Number((((result.currentPrice - average) / average) * 100).toFixed(1)) : null;
     const previous = routeHistory.at(-1)?.price;
-    const changePct = previous && result.currentPrice
-      ? Number((((result.currentPrice - previous) / previous) * 100).toFixed(1))
-      : null;
+    const changePct = previous && result.currentPrice ? Number((((result.currentPrice - previous) / previous) * 100).toFixed(1)) : null;
     return { ...result, average30d: average ? Math.round(average) : null, priceVsAveragePct, changePct };
   });
 }
 
 async function explainWithAI(results) {
-  if (!process.env.OPENAI_API_KEY) return results;
+  if (!process.env.OPENAI_API_KEY || !results.length) return results;
   const model = process.env.OPENAI_MODEL || 'gpt-5.6-terra';
   const compact = results.map(({ id, origin, destination, currentPrice, targetPrice, average30d, priceVsAveragePct, targetHit }) => ({ id, origin, destination, currentPrice, targetPrice, average30d, priceVsAveragePct, targetHit }));
   const response = await fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
-    headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model,
-      input: `你是台灣旅客的機票價格分析助手。請根據以下真實 API 數字，為每個 id 各寫一句 35 字內繁體中文購買建議。不得捏造價格。只輸出 JSON 物件，鍵為 id，值為建議。資料：${JSON.stringify(compact)}`,
-      max_output_tokens: 350
-    })
+    headers: { Authorization:`Bearer ${process.env.OPENAI_API_KEY}`, 'Content-Type':'application/json' },
+    body: JSON.stringify({ model, input:`你是台灣旅客的機票價格分析助手。請根據以下真實 API 數字，為每個 id 各寫一句 35 字內繁體中文購買建議。不得捏造價格。只輸出 JSON 物件，鍵為 id，值為建議。資料：${JSON.stringify(compact)}`, max_output_tokens:350 })
   });
   if (!response.ok) return results;
   const payload = await response.json();
   const text = payload.output_text || payload.output?.flatMap(item => item.content || []).find(item => item.type === 'output_text')?.text;
   try {
     const advice = JSON.parse(text.replace(/^```json\s*|\s*```$/g, ''));
-    return results.map(result => ({ ...result, aiAdvice: advice[result.id] || null }));
+    return results.map(result => ({ ...result, aiAdvice:advice[result.id] || null }));
   } catch { return results; }
+}
+
+async function syncCloudSuccess(result) {
+  const checkedAt = result.checkedAt || new Date().toISOString();
+  await supabaseRequest(`flight_watches?id=eq.${encodeURIComponent(result.id)}`, {
+    method:'PATCH',
+    headers:{ Prefer:'return=minimal' },
+    body:JSON.stringify({
+      previous_price: result.previousCloudPrice,
+      current_price: result.currentPrice,
+      offer_count: result.offerCount,
+      provider: 'Google Flights via SerpApi',
+      search_url: result.searchUrl,
+      last_checked_at: checkedAt,
+      last_error: null
+    })
+  });
+  if (result.currentPrice) {
+    await supabaseRequest('watch_prices', {
+      method:'POST',
+      headers:{ Prefer:'return=minimal' },
+      body:JSON.stringify({ watch_id:result.id, user_id:result.userId, price:result.currentPrice, checked_at:checkedAt, provider:'Google Flights via SerpApi' })
+    });
+  }
+}
+
+async function syncCloudFailure(watch, message) {
+  await supabaseRequest(`flight_watches?id=eq.${encodeURIComponent(watch.id)}`, {
+    method:'PATCH', headers:{ Prefer:'return=minimal' }, body:JSON.stringify({ last_error:message, last_checked_at:new Date().toISOString() })
+  });
 }
 
 async function sendLine(message) {
   if (!process.env.LINE_CHANNEL_ACCESS_TOKEN || !process.env.LINE_USER_ID) return;
-  await fetch('https://api.line.me/v2/bot/message/push', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ to: process.env.LINE_USER_ID, messages: [{ type: 'text', text: message }] })
-  });
+  await fetch('https://api.line.me/v2/bot/message/push', { method:'POST', headers:{ Authorization:`Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`, 'Content-Type':'application/json' }, body:JSON.stringify({ to:process.env.LINE_USER_ID, messages:[{ type:'text', text:message }] }) });
 }
-
 async function sendEmail(subject, html) {
   if (!process.env.RESEND_API_KEY || !process.env.ALERT_EMAIL) return;
-  await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: process.env.ALERT_FROM || 'Flyday <onboarding@resend.dev>', to: [process.env.ALERT_EMAIL], subject, html })
-  });
+  await fetch('https://api.resend.com/emails', { method:'POST', headers:{ Authorization:`Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type':'application/json' }, body:JSON.stringify({ from:process.env.ALERT_FROM || 'Flyday <onboarding@resend.dev>', to:[process.env.ALERT_EMAIL], subject, html }) });
 }
-
 async function createGitHubIssue(result) {
   if (!process.env.GITHUB_TOKEN || !process.env.GITHUB_REPOSITORY) return;
   const title = `[低價通知] ${result.origin} → ${result.destination} NT$ ${result.currentPrice.toLocaleString('zh-TW')}`;
   const api = `https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}`;
-  const headers = { Authorization: `Bearer ${process.env.GITHUB_TOKEN}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' };
-  await fetch(`${api}/labels`, {
-    method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: 'price-alert', color: 'ff6a45', description: 'Flyday 自動低價通知' })
-  });
-  const existing = await fetch(`${api}/issues?state=open&labels=price-alert&per_page=30`, { headers }).then(r => r.ok ? r.json() : []);
+  const headers = { Authorization:`Bearer ${process.env.GITHUB_TOKEN}`, Accept:'application/vnd.github+json', 'X-GitHub-Api-Version':'2022-11-28' };
+  await fetch(`${api}/labels`, { method:'POST', headers:{ ...headers, 'Content-Type':'application/json' }, body:JSON.stringify({ name:'price-alert', color:'ff6a45', description:'Flyday 自動低價通知' }) });
+  const existing = await fetch(`${api}/issues?state=open&labels=price-alert&per_page=30`, { headers }).then(response => response.ok ? response.json() : []);
   if (existing.some(issue => issue.title === title)) return;
-  await fetch(`${api}/issues`, {
-    method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title, labels: ['price-alert'], body: `## Flyday 找到低價\n\n- 航線：${result.origin} → ${result.destination}\n- 日期：${result.departureDate} ～ ${result.returnDate}\n- 目前最低：**NT$ ${result.currentPrice.toLocaleString('zh-TW')}**\n- 目標價格：NT$ ${result.targetPrice.toLocaleString('zh-TW')}\n- 航班選項：${result.offerCount} 個\n\n${result.aiAdvice || '價格已達到你設定的條件，建議重新查價確認後決定。'}\n\n[打開 Flyday](https://kc09393.github.io/flyday-flight-watch/)` })
-  });
+  await fetch(`${api}/issues`, { method:'POST', headers:{ ...headers, 'Content-Type':'application/json' }, body:JSON.stringify({ title, labels:['price-alert'], body:`## Flyday 找到低價\n\n- 航線：${result.origin} → ${result.destination}\n- 日期：${result.departureDate} ～ ${result.returnDate}\n- 目前最低：**NT$ ${result.currentPrice.toLocaleString('zh-TW')}**\n- 目標價格：NT$ ${result.targetPrice.toLocaleString('zh-TW')}\n\n[打開 Flyday](https://kc09393.github.io/flyday-flight-watch/)` }) });
 }
-
 async function notify(results, previousLatest) {
   for (const result of results) {
     if (!result.currentPrice) continue;
@@ -152,41 +216,57 @@ async function notify(results, previousLatest) {
     const newlyHit = result.targetHit && (!old?.targetHit || result.currentPrice < old.currentPrice);
     const exceptionalDrop = result.priceVsAveragePct !== null && result.priceVsAveragePct <= -10 && (!old?.currentPrice || result.currentPrice < old.currentPrice);
     if (!newlyHit && !exceptionalDrop) continue;
-    const message = `✈️ Flyday 低價通知\n${result.origin} → ${result.destination}\n${result.departureDate} ～ ${result.returnDate}\n目前 NT$ ${result.currentPrice.toLocaleString('zh-TW')}\n${result.aiAdvice || '已達到你的低價條件。'}\nhttps://kc09393.github.io/flyday-flight-watch/`;
-    await Promise.allSettled([
-      createGitHubIssue(result),
-      sendLine(message),
-      sendEmail(`Flyday 低價：${result.origin} → ${result.destination}`, `<h2>${result.origin} → ${result.destination}</h2><p>目前最低 <strong>NT$ ${result.currentPrice.toLocaleString('zh-TW')}</strong></p><p>${result.aiAdvice || ''}</p>`)
-    ]);
+    const message = `✈️ Flyday 低價通知\n${result.origin} → ${result.destination}\n${result.departureDate} ～ ${result.returnDate}\n目前 NT$ ${result.currentPrice.toLocaleString('zh-TW')}\nhttps://kc09393.github.io/flyday-flight-watch/`;
+    await Promise.allSettled([createGitHubIssue(result), sendLine(message), sendEmail(`Flyday 低價：${result.origin} → ${result.destination}`, `<h2>${result.origin} → ${result.destination}</h2><p>目前最低 <strong>NT$ ${result.currentPrice.toLocaleString('zh-TW')}</strong></p>`)]);
   }
 }
 
 async function main() {
-  const config = await readJson(CONFIG_PATH, { watches: [] });
-  const previousLatest = await readJson(LATEST_PATH, { results: [] });
+  const config = await readJson(CONFIG_PATH, { watches:[] });
+  const previousLatest = await readJson(LATEST_PATH, { results:[] });
   const history = await readJson(HISTORY_PATH, []);
   if (!process.env.SERPAPI_API_KEY) {
-    console.log('SerpApi credentials are not configured; workflow wiring is ready.');
+    console.log('SerpApi credentials are not configured.');
     return;
   }
 
-  const configuredWatches = Array.isArray(config.watches) ? config.watches : [];
-  const activeWatches = configuredWatches.slice(0, MAX_DAILY_WATCHES);
-  const skippedErrors = configuredWatches.slice(MAX_DAILY_WATCHES).map(watch => `${watch.id} skipped to protect the free monthly search quota`);
-  const settled = await Promise.allSettled(activeWatches.map(watch => searchWatch(process.env.SERPAPI_API_KEY, watch, config)));
-  const rawResults = settled.filter(item => item.status === 'fulfilled').map(item => item.value);
-  const errors = [...settled.filter(item => item.status === 'rejected').map(item => item.reason.message), ...skippedErrors];
-  let results = addInsights(rawResults, history);
-  results = await explainWithAI(results);
+  const publicWatches = (Array.isArray(config.watches) ? config.watches : []).map(watch => ({ ...watch, source:'public' }));
+  let cloudWatches = [];
+  try { cloudWatches = await loadCloudWatches(); }
+  catch (error) { console.warn(`Cloud watches unavailable: ${error.message}`); }
+
+  const groups = groupWatches([...publicWatches, ...cloudWatches]);
+  const activeGroups = groups.slice(0, MAX_DAILY_SEARCHES);
+  const skippedGroups = groups.slice(MAX_DAILY_SEARCHES);
+  const settled = await Promise.allSettled(activeGroups.map(async group => ({ group, search:await searchWatch(process.env.SERPAPI_API_KEY, group.query, config) })));
+  const fulfilled = settled.filter(item => item.status === 'fulfilled').map(item => item.value);
+  const failed = settled.filter(item => item.status === 'rejected').map((item, index) => ({ group:activeGroups[settled.indexOf(item)], message:item.reason.message || String(item.reason), index }));
+  const expanded = fulfilled.flatMap(item => expandResult(item.group, item.search));
+  const publicRaw = expanded.filter(result => result.source === 'public');
+  const cloudResults = expanded.filter(result => result.source === 'cloud');
+  const errors = [
+    ...failed.flatMap(item => item.group.members.filter(member => member.source === 'public').map(() => item.message)),
+    ...skippedGroups.flatMap(group => group.members.filter(member => member.source === 'public').map(member => `${member.id} skipped to protect the free monthly quota`))
+  ];
+
+  let publicResultsWithInsights = addInsights(publicRaw, history);
+  publicResultsWithInsights = await explainWithAI(publicResultsWithInsights);
   const checkedAt = new Date().toISOString();
-  const newHistory = [...history, ...results.filter(r => r.currentPrice).map(r => ({ watchId: r.id, price: r.currentPrice, checkedAt }))].slice(-1500);
-  const latest = { status: errors.length ? 'partial' : 'live', provider: 'Google Flights via SerpApi', updatedAt: checkedAt, errors, results };
+  const newHistory = [...history, ...publicResultsWithInsights.filter(result => result.currentPrice).map(result => ({ watchId:result.id, price:result.currentPrice, checkedAt }))].slice(-1500);
+  const latest = { status:errors.length ? 'partial' : 'live', provider:'Google Flights via SerpApi', updatedAt:checkedAt, errors, results:publicResultsWithInsights };
+
+  const cloudSyncTasks = [
+    ...cloudResults.map(syncCloudSuccess),
+    ...failed.flatMap(item => item.group.members.filter(member => member.source === 'cloud').map(member => syncCloudFailure(member, item.message))),
+    ...skippedGroups.flatMap(group => group.members.filter(member => member.source === 'cloud').map(member => syncCloudFailure(member, '今日免費巡價額度已滿，明天會再嘗試')))
+  ];
+  const cloudSync = await Promise.allSettled(cloudSyncTasks);
+  const cloudSyncErrors = cloudSync.filter(item => item.status === 'rejected');
+  if (cloudSyncErrors.length) console.warn(`${cloudSyncErrors.length} cloud updates failed`);
+
   await Promise.all([writeJson(LATEST_PATH, latest), writeJson(HISTORY_PATH, newHistory)]);
-  await notify(results, previousLatest);
-  console.log(`Updated ${results.length} routes at ${checkedAt}`);
+  await notify(publicResultsWithInsights, previousLatest);
+  console.log(`Updated ${publicResultsWithInsights.length} public and ${cloudResults.length} cloud watches using ${activeGroups.length} searches at ${checkedAt}`);
 }
 
-main().catch(error => {
-  console.error(error);
-  process.exitCode = 1;
-});
+main().catch(error => { console.error(error); process.exitCode = 1; });

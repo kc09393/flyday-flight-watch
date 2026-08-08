@@ -2,177 +2,151 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#f5f4ef" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f6f1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Flyday" />
-  <title>飛巡 Flyday — 聰明等一張好機票</title>
+  <meta name="description" content="登入後跨裝置同步，每天自動查詢 Google Flights 真實票價。" />
+  <title>Flyday 飛巡｜機票低價監控</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="app-shell">
-    <aside class="sidebar">
-      <a class="brand" href="#" aria-label="Flyday 首頁">
+    <header class="app-header">
+      <a class="brand" href="#home" data-view-link="home" aria-label="Flyday 首頁">
         <span class="brand-mark" aria-hidden="true">
           <svg viewBox="0 0 32 32"><path d="M6 17.2 25.6 7c1.5-.8 2.9.7 2 2.1L16.4 25.3l-2.7-7.2-7.2 1.3c-1.4.2-1.8-1.5-.5-2.2Z"/><path d="m13.7 18.1 5.8-4.5"/></svg>
         </span>
         <span>Flyday</span>
       </a>
-
-      <nav class="main-nav" aria-label="主要導覽">
-        <a class="nav-item active" href="#dashboard">
-          <svg viewBox="0 0 24 24"><path d="M4 13h6V4H4v9Zm0 7h6v-4H4v4Zm10 0h6v-9h-6v9Zm0-16v4h6V4h-6Z"/></svg>
-          <span>總覽</span>
-        </a>
-        <a class="nav-item" href="#watches">
-          <svg viewBox="0 0 24 24"><path d="M12 8v4l2.5 2.5M5.1 19.1A10 10 0 1 1 19 5.3M4 4v5h5"/></svg>
-          <span>我的監控</span><span class="nav-count" id="watchCount">3</span>
-        </a>
-        <a class="nav-item" href="#explore">
-          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
-          <span>探索低價</span>
-        </a>
-        <a class="nav-item" href="#insights">
-          <svg viewBox="0 0 24 24"><path d="M4 19V9m6 10V5m6 14v-7m4 7H2"/></svg>
-          <span>價格洞察</span>
-        </a>
+      <nav class="desktop-nav" aria-label="主要功能">
+        <button class="nav-button active" data-view="home">我的監控</button>
+        <button class="nav-button" data-view="alerts">低價通知 <span class="nav-badge" id="alertCount" hidden>0</span></button>
+        <button class="nav-button" data-view="settings">設定</button>
       </nav>
-
-      <div class="sidebar-spacer"></div>
-      <div class="ai-status">
-        <div class="ai-orbit"><span></span></div>
-        <div><strong id="monitorStatusTitle">準備啟用巡價</strong><small id="monitorStatusDetail">補上航班 API 後每天更新</small></div>
+      <div class="header-actions">
+        <button class="icon-button" id="notificationButton" aria-label="查看低價通知">
+          <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><i id="notificationDot" hidden></i>
+        </button>
+        <button class="account-button" id="accountButton"><span class="avatar">KC</span><span id="accountLabel">登入同步</span></button>
+        <button class="primary-button" data-open-watch><span>＋</span> 新增監控</button>
       </div>
-      <nav class="secondary-nav">
-        <a href="#notifications"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>通知</a>
-        <a href="#settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.6v-.2h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></svg>設定</a>
-      </nav>
-      <div class="profile"><div class="avatar">KC</div><div><strong>Kevin Chen</strong><small>免費方案</small></div><button aria-label="開啟個人選單">•••</button></div>
-    </aside>
+    </header>
 
-    <main id="dashboard" class="main-content">
-      <header class="topbar">
-        <button class="mobile-menu" id="menuBtn" aria-label="開啟選單">☰</button>
-        <div class="eyebrow" id="todayLabel"></div>
-        <div class="top-actions">
-          <button class="install-button" id="installAppBtn" hidden>安裝 App</button>
-          <button class="icon-button" aria-label="通知"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><i></i></button>
-          <button class="primary-button" data-open-modal><span>＋</span> 新增監控</button>
-        </div>
-      </header>
-
-      <section class="welcome">
-        <div>
-          <p class="section-kicker"><span id="greetingLabel">你好</span>，Kevin</p>
-          <h1>今天也幫你盯著，<br><em>等一張好機票。</em></h1>
-        </div>
-        <p class="welcome-copy" id="welcomeSummary"><span id="welcomeCount">3</span> 個行程已儲存在這台手機。接上航班 API 後，才會開始定時巡價與發送低價通知。</p>
-      </section>
-
-      <section class="ask-card" aria-labelledby="ask-title">
-        <div class="ask-glow"></div>
-        <div class="ask-heading">
-          <div class="spark-icon">✦</div>
-          <div><span>FLYDAY AI</span><h2 id="ask-title">想去哪裡？直接跟我說</h2></div>
-        </div>
-        <form id="aiForm" class="ai-input-wrap">
-          <textarea id="aiPrompt" rows="1" aria-label="輸入旅程需求" placeholder="例如：10 月中從台北去東京，玩 5 天，來回希望在 9,000 元內"></textarea>
-          <button type="submit" aria-label="送出"><svg viewBox="0 0 24 24"><path d="m5 12 14-7-5 14-2-6-7-1Z"/></svg></button>
-        </form>
-        <div class="prompt-row"><span>試著問：</span><button class="prompt-chip">跨年去哪裡最便宜？</button><button class="prompt-chip">找週末快閃大阪</button><button class="prompt-chip">避開紅眼航班</button></div>
-        <div class="ai-reply" id="aiReply" hidden>
-          <div class="reply-loader"><span></span><span></span><span></span></div>
-          <div class="reply-content"></div>
-        </div>
-      </section>
-
-      <section id="watches" class="section-block">
-        <div class="section-title-row"><div><p class="section-kicker">PRICE WATCH</p><h2>正在監控</h2></div><button class="text-button" data-open-modal>管理全部 <span>→</span></button></div>
-        <div class="watch-grid" id="watchGrid"></div>
-      </section>
-
-      <section class="insight-layout" id="insights">
-        <article class="panel trend-panel">
-          <div class="panel-head"><div><p class="section-kicker">PRICE TREND・介面範例</p><h2>台北 → 東京</h2></div><div class="range-tabs"><button>7天</button><button class="active">30天</button><button>90天</button></div></div>
-          <div class="chart-meta"><div><span>目前最低</span><strong>NT$ 8,420</strong><small class="down">↓ 12.4%</small></div><span>近 30 天</span></div>
-          <div class="chart-wrap">
-            <svg viewBox="0 0 760 220" preserveAspectRatio="none" aria-label="東京票價 30 天趨勢圖">
-              <defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6b45" stop-opacity=".25"/><stop offset="1" stop-color="#ff6b45" stop-opacity="0"/></linearGradient></defs>
-              <g class="grid-lines"><path d="M0 25H760M0 92H760M0 159H760"/></g>
-              <path class="area" d="M0 70 C35 62 45 85 82 76 S132 45 165 60 S217 112 251 100 S290 78 326 91 S368 147 407 137 S458 104 491 116 S538 166 575 153 S623 125 658 141 S714 184 760 175 L760 220 L0 220Z"/>
-              <path class="line" d="M0 70 C35 62 45 85 82 76 S132 45 165 60 S217 112 251 100 S290 78 326 91 S368 147 407 137 S458 104 491 116 S538 166 575 153 S623 125 658 141 S714 184 760 175"/>
-              <line class="target-line" x1="0" y1="148" x2="760" y2="148"/><text x="10" y="141">你的目標 NT$ 9,000</text>
-              <circle class="chart-dot" cx="760" cy="175" r="6"/><circle class="chart-dot-ring" cx="760" cy="175" r="11"/>
-            </svg>
-            <div class="chart-labels"><span>7/10</span><span>7/17</span><span>7/24</span><span>7/31</span><span>今天</span></div>
+    <main class="main-content">
+      <section class="app-view active" id="homeView" data-view-panel="home">
+        <div class="hero">
+          <div>
+            <p class="eyebrow" id="todayLabel"></p>
+            <h1>不用一直查，<em>便宜時再出手。</em></h1>
+            <p id="welcomeSummary">正在連接最新票價…</p>
           </div>
-        </article>
+          <div class="sync-card" id="syncCard">
+            <span class="sync-dot"></span>
+            <div><strong id="syncTitle">載入中</strong><small id="syncDetail">正在取得 Google Flights 票價</small></div>
+          </div>
+        </div>
 
-        <aside class="panel ai-insight">
-          <div class="insight-badge"><span>✦</span> AI 票價判讀・功能預覽</div>
-          <div class="score-ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42"/><circle class="progress" cx="50" cy="50" r="42"/></svg><div><strong>87</strong><span>好價分數</span></div></div>
-          <h3>現在是好時機</h3>
-          <p>目前價格低於近 30 天平均 <strong>12.4%</strong>，且距離出發僅 68 天，繼續下跌空間有限。</p>
-          <div class="confidence"><span><i></i>AI 信心</span><strong>高</strong></div>
-          <button class="dark-button" id="viewFlightsBtn">查看 6 個推薦航班 <span>→</span></button>
-        </aside>
+        <section class="smart-card" aria-labelledby="smartTitle">
+          <div class="smart-heading"><span class="spark">✦</span><div><p>快速建立</p><h2 id="smartTitle">一句話告訴我想去哪</h2></div></div>
+          <form id="smartForm" class="smart-form">
+            <input id="smartPrompt" aria-label="輸入旅程需求" placeholder="例如：10 月 15 日去東京，五天，九千元內" autocomplete="off" />
+            <button type="submit">幫我填好</button>
+          </form>
+          <div class="smart-chips"><button type="button" data-smart="台北去東京，10月15日出發，玩5天，9000元內">東京 5 天</button><button type="button" data-smart="台北去大阪，週五出發玩3天，8000元內">大阪週末</button><button type="button" data-smart="台北去重慶，玩7天，16000元內">重慶 7 天</button></div>
+          <div class="smart-result" id="smartResult" hidden></div>
+        </section>
+
+        <section class="watch-section" aria-labelledby="watchTitle">
+          <div class="section-head"><div><p class="eyebrow">PRICE WATCH</p><h2 id="watchTitle">我的監控</h2></div><button class="text-button" id="refreshButton">↻ 重新整理</button></div>
+          <div class="watch-grid" id="watchGrid" aria-live="polite"></div>
+          <div class="empty-state" id="emptyState" hidden><span>✈</span><h3>還沒有監控行程</h3><p>建立第一條航線，Flyday 每天會幫你查一次。</p><button class="primary-button" data-open-watch>新增第一條監控</button></div>
+        </section>
       </section>
 
-      <section id="explore" class="section-block deals-section">
-        <div class="section-title-row"><div><p class="section-kicker">SMART PICKS・範例</p><h2>你可能會喜歡</h2></div><div class="deal-filter"><button class="active">全部</button><button>日本</button><button>東南亞</button><button>週末快閃</button></div></div>
-        <div class="deal-list" id="dealList">
-          <article class="deal-row" data-region="日本">
-            <div class="airline peach">MM</div><div class="route-main"><strong>台北 <span>→</span> 大阪</strong><span>樂桃航空・直飛・2h 40m</span></div>
-            <div class="date-cell"><span>週末快閃</span><strong>9/18 — 9/21</strong></div><div class="deal-score high">近 60 天最低</div>
-            <div class="deal-price"><span>來回含稅</span><strong>NT$ 5,680</strong></div><button class="round-arrow" aria-label="查看大阪航班">→</button>
+      <section class="app-view" id="alertsView" data-view-panel="alerts" hidden>
+        <div class="page-head"><p class="eyebrow">ALERTS</p><h1>低價通知</h1><p>達到你設定的價格時，會集中顯示在這裡。</p></div>
+        <div class="alert-list" id="alertList"></div>
+        <div class="empty-state" id="alertEmpty"><span>🔔</span><h3>目前沒有新通知</h3><p>Flyday 每天早上巡價，達標後會出現在這裡。</p></div>
+      </section>
+
+      <section class="app-view" id="settingsView" data-view-panel="settings" hidden>
+        <div class="page-head"><p class="eyebrow">SETTINGS</p><h1>帳號與設定</h1><p>用同一個 Email 登入，手機和電腦就會共用監控清單。</p></div>
+        <div class="settings-grid">
+          <article class="settings-card">
+            <div class="setting-icon">☁</div><div><h2>雲端同步</h2><p id="cloudAccountText">尚未登入，目前顯示公開巡價資料。</p></div>
+            <button class="dark-button" id="cloudAccountButton">使用 Email 登入</button>
           </article>
-          <article class="deal-row" data-region="東南亞">
-            <div class="airline viet">VJ</div><div class="route-main"><strong>台北 <span>→</span> 峴港</strong><span>越捷航空・直飛・2h 55m</span></div>
-            <div class="date-cell"><span>請 1 休 4</span><strong>10/9 — 10/12</strong></div><div class="deal-score">比平常省 21%</div>
-            <div class="deal-price"><span>來回含稅</span><strong>NT$ 6,240</strong></div><button class="round-arrow" aria-label="查看峴港航班">→</button>
+          <article class="settings-card">
+            <div class="setting-icon">🔔</div><div><h2>瀏覽器通知</h2><p id="browserNotificationText">開啟後，當你使用 Flyday 時會跳出達標提醒。</p></div>
+            <button class="outline-button" id="browserNotificationButton">開啟通知</button>
           </article>
-          <article class="deal-row" data-region="日本">
-            <div class="airline star">★</div><div class="route-main"><strong>台北 <span>→</span> 福岡</strong><span>星宇航空・直飛・2h 10m</span></div>
-            <div class="date-cell"><span>中秋連假</span><strong>9/25 — 9/28</strong></div><div class="deal-score">全服務航空</div>
-            <div class="deal-price"><span>來回含稅</span><strong>NT$ 8,910</strong></div><button class="round-arrow" aria-label="查看福岡航班">→</button>
+          <article class="settings-card">
+            <div class="setting-icon">▣</div><div><h2>安裝到手機</h2><p>安裝後會像 App 一樣出現在主畫面，也能全螢幕使用。</p></div>
+            <button class="outline-button" id="installAppButton">查看安裝方式</button>
+          </article>
+          <article class="settings-card">
+            <div class="setting-icon">◎</div><div><h2>資料來源</h2><p>Google Flights via SerpApi，每天約 07:17（台北時間）更新。</p></div>
+            <a class="outline-button link-button" href="https://github.com/kc09393/flyday-flight-watch/actions" target="_blank" rel="noopener">查看巡價紀錄</a>
           </article>
         </div>
       </section>
-
-      <footer><span id="dataStatus">Flyday beta・等待真實票價設定</span><span id="lastUpdated">資料每天早上更新一次</span></footer>
     </main>
+
+    <nav class="bottom-nav" aria-label="手機導覽">
+      <button class="active" data-view="home"><span>⌂</span>監控</button>
+      <button data-view="alerts"><span>♢</span>通知 <i id="mobileAlertCount" hidden>0</i></button>
+      <button data-open-watch class="add-tab"><span>＋</span>新增</button>
+      <button data-view="settings"><span>⚙</span>設定</button>
+    </nav>
   </div>
 
   <div class="modal-backdrop" id="watchModal" hidden>
-    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <div class="modal-head"><div><p class="section-kicker">新增監控</p><h2 id="modalTitle">想去哪裡？</h2><p class="modal-lead">填好地點、日期和預算，就完成了。</p></div><button class="close-modal" aria-label="關閉">×</button></div>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="watchModalTitle">
+      <div class="modal-head"><div><p class="eyebrow" id="watchModalEyebrow">新增監控</p><h2 id="watchModalTitle">想去哪裡？</h2><p>四個步驟就完成。</p></div><button class="close-button" data-close-watch aria-label="關閉">×</button></div>
       <form id="watchForm">
-        <div class="simple-route">
-          <label class="simple-field"><span><b>1</b> 從哪裡出發</span><input id="fromInput" value="台北 TPE" list="cityList" autocomplete="off" required></label>
-          <span class="route-arrow" aria-hidden="true">↓</span>
-          <label class="simple-field"><span><b>2</b> 想去哪裡</span><input id="toInput" placeholder="直接輸入中文，例如：重慶" list="cityList" autocomplete="off" required></label>
+        <input type="hidden" id="watchId" />
+        <div class="route-box">
+          <label class="form-field"><span><b>1</b> 從哪裡出發</span><input id="fromInput" value="台北 TPE" list="cityList" autocomplete="off" required /></label>
+          <span class="route-down">↓</span>
+          <label class="form-field"><span><b>2</b> 想去哪裡</span><input id="toInput" placeholder="直接輸入中文，例如：重慶" list="cityList" autocomplete="off" required /></label>
         </div>
         <div class="quick-cities" aria-label="常用目的地"><span>快速選：</span><button type="button" data-city="東京 NRT">東京</button><button type="button" data-city="大阪 KIX">大阪</button><button type="button" data-city="首爾 ICN">首爾</button><button type="button" data-city="曼谷 BKK">曼谷</button><button type="button" data-city="重慶 CKG">重慶</button></div>
-        <div class="simple-grid">
-          <label class="simple-field"><span><b>3</b> 去程</span><input id="departInput" type="date" required></label>
-          <label class="simple-field"><span>回程</span><input id="returnInput" type="date" required></label>
+        <div class="date-grid">
+          <label class="form-field"><span><b>3</b> 去程</span><input id="departInput" type="date" required /></label>
+          <label class="form-field"><span>回程</span><input id="returnInput" type="date" required /></label>
         </div>
-        <label class="simple-field budget-field"><span><b>4</b> 多少錢以下通知我？</span><div class="input-prefix"><b>NT$</b><input id="priceInput" type="number" inputmode="numeric" min="1" placeholder="例如 10,000" required></div></label>
-        <p class="simple-note">預設：來回、1 位、經濟艙</p>
-        <button class="modal-submit" type="submit"><span>＋</span> 開始監控</button>
+        <label class="form-field budget-field"><span><b>4</b> 多少錢以下通知我？</span><div class="money-input"><b>NT$</b><input id="priceInput" type="number" inputmode="numeric" min="1" max="1000000" placeholder="例如 10,000" required /></div></label>
+        <details class="advanced-options"><summary>進階選項</summary><label><input id="nonstopInput" type="checkbox" /> 只看直飛航班</label></details>
+        <button class="submit-button" id="watchSubmitButton" type="submit">開始監控</button>
       </form>
       <datalist id="cityList">
-        <option value="台北 TPE"><option value="高雄 KHH"><option value="東京 NRT"><option value="大阪 KIX"><option value="首爾 ICN"><option value="曼谷 BKK"><option value="重慶 CKG"><option value="香港 HKG"><option value="新加坡 SIN"><option value="沖繩 OKA"><option value="福岡 FUK"><option value="上海 PVG"><option value="北京 PEK"><option value="成都 CTU">
+        <option value="台北 TPE"><option value="高雄 KHH"><option value="東京 NRT"><option value="大阪 KIX"><option value="首爾 ICN"><option value="釜山 PUS"><option value="曼谷 BKK"><option value="重慶 CKG"><option value="香港 HKG"><option value="新加坡 SIN"><option value="沖繩 OKA"><option value="福岡 FUK"><option value="上海 PVG"><option value="北京 PEK"><option value="成都 CTU">
       </datalist>
     </section>
   </div>
-  <div class="toast" id="toast" role="status"><span>✓</span><div><strong>監控已建立</strong><small>有好價格時會立即通知你</small></div></div>
+
+  <div class="modal-backdrop" id="authModal" hidden>
+    <section class="modal auth-modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <div class="modal-head"><div><p class="eyebrow">雲端同步</p><h2 id="authTitle">用 Email 登入</h2><p>不用密碼，我們會寄一封安全登入信給你。</p></div><button class="close-button" data-close-auth aria-label="關閉">×</button></div>
+      <form id="authForm">
+        <label class="form-field"><span>Email</span><input id="emailInput" type="email" inputmode="email" autocomplete="email" placeholder="你的 Email" required /></label>
+        <button class="submit-button" id="authSubmitButton" type="submit">寄登入連結</button>
+      </form>
+      <div class="auth-message" id="authMessage" hidden></div>
+      <p class="privacy-note">登入只用來同步你的監控，其他人看不到你的行程。</p>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"><span id="toastIcon">✓</span><div><strong id="toastTitle">完成</strong><small id="toastMessage"></small></div></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
 </body>
 </html>
