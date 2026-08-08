@@ -429,6 +429,9 @@ function setupQuickWatchForm() {
   $('#quickReturnInput').min = defaults.departureDate;
   $('#quickReturnInput').value = defaults.returnDate;
   $('#quickMonthInput').min = formatInputDate(new Date()).slice(0, 7);
+  const latestFlexibleMonth = new Date();
+  latestFlexibleMonth.setMonth(latestFlexibleMonth.getMonth() + 5);
+  $('#quickMonthInput').max = formatInputDate(latestFlexibleMonth).slice(0, 7);
   $('#quickMonthInput').value = defaults.departureDate.slice(0, 7);
   setQuickDateMode('exact');
 }

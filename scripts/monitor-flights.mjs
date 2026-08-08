@@ -171,14 +171,14 @@ function flexibleMonthRange(travelMonth) {
 
 async function searchFlexibleWatch(apiKey, watch, settings) {
   const range = flexibleMonthRange(watch.travelMonth);
+  const duration = Number(watch.tripDaysMax) <= 5 ? '2' : Number(watch.tripDaysMin) >= 10 ? '3' : '1';
   const query = new URLSearchParams({
-    engine: 'google_flights_deals',
+    engine: 'google_travel_explore',
     api_key: apiKey,
     departure_id: watch.origin,
     arrival_id: watch.destination,
-    outbound_date: `${range.start},${range.end}`,
-    trip_length: `${watch.tripDaysMin || 6},${watch.tripDaysMax || 9}`,
-    adults: String(watch.adults || settings.adults || 1),
+    month: String(Number(range.start.slice(5, 7))),
+    travel_duration: duration,
     currency: settings.currency || 'TWD',
     gl: 'tw',
     hl: 'zh-tw',
@@ -191,22 +191,19 @@ async function searchFlexibleWatch(apiKey, watch, settings) {
   if (!response.ok) throw new Error(`${watch.origin}-${watch.destination} flexible search failed (${response.status}): ${payload.error || 'SerpApi request failed'}`);
   if (payload.error) throw new Error(`${watch.origin}-${watch.destination} flexible search failed: ${payload.error}`);
 
-  const deals = [...(payload.deals || payload.destinations || [])]
-    .filter(deal => Number.isFinite(Number(deal.price)) && deal.start_date && deal.end_date)
+  const flights = [...(payload.flights || [])]
+    .filter(flight => Number.isFinite(Number(flight.price)))
     .sort((a, b) => Number(a.price) - Number(b.price));
-  const cheapest = deals[0];
-  const average = Number(cheapest?.average_price);
+  const cheapest = flights[0];
   return {
     currentPrice: cheapest ? Number(cheapest.price) : null,
     currency: settings.currency || 'TWD',
-    offerCount: deals.length,
+    offerCount: flights.length,
     cheapestOffer: cheapest || null,
-    priceInsights: Number.isFinite(average) && average > 0
-      ? { typical_price_range:[Math.round(average * .85), Math.round(average * 1.15)] }
-      : null,
-    searchUrl: cheapest?.flight_link || payload.search_metadata?.google_flights_deals_url || null,
-    departureDate: cheapest?.start_date || watch.departureDate,
-    returnDate: cheapest?.end_date || watch.returnDate,
+    priceInsights: null,
+    searchUrl: payload.search_metadata?.google_travel_explore_url || payload.link || null,
+    departureDate: payload.start_date || watch.departureDate,
+    returnDate: payload.end_date || watch.returnDate,
     checkedAt: new Date().toISOString()
   };
 }
@@ -267,7 +264,7 @@ async function syncCloudSuccess(result) {
     current_price: result.currentPrice,
     target_price: result.targetPrice,
     offer_count: result.offerCount,
-    provider: result.searchMode === 'month' ? 'Google Flights Deals via SerpApi' : 'Google Flights via SerpApi',
+    provider: result.searchMode === 'month' ? 'Google Travel Explore via SerpApi' : 'Google Flights via SerpApi',
     search_url: result.searchUrl,
     last_checked_at: checkedAt,
     last_error: null
