@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f5f4ef" />
+  <title>飛巡 Flyday — 聰明等一張好機票</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#" aria-label="Flyday 首頁">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32"><path d="M6 17.2 25.6 7c1.5-.8 2.9.7 2 2.1L16.4 25.3l-2.7-7.2-7.2 1.3c-1.4.2-1.8-1.5-.5-2.2Z"/><path d="m13.7 18.1 5.8-4.5"/></svg>
+        </span>
+        <span>Flyday</span>
+      </a>
+
+      <nav class="main-nav" aria-label="主要導覽">
+        <a class="nav-item active" href="#dashboard">
+          <svg viewBox="0 0 24 24"><path d="M4 13h6V4H4v9Zm0 7h6v-4H4v4Zm10 0h6v-9h-6v9Zm0-16v4h6V4h-6Z"/></svg>
+          <span>總覽</span>
+        </a>
+        <a class="nav-item" href="#watches">
+          <svg viewBox="0 0 24 24"><path d="M12 8v4l2.5 2.5M5.1 19.1A10 10 0 1 1 19 5.3M4 4v5h5"/></svg>
+          <span>我的監控</span><span class="nav-count" id="watchCount">3</span>
+        </a>
+        <a class="nav-item" href="#explore">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+          <span>探索低價</span>
+        </a>
+        <a class="nav-item" href="#insights">
+          <svg viewBox="0 0 24 24"><path d="M4 19V9m6 10V5m6 14v-7m4 7H2"/></svg>
+          <span>價格洞察</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-spacer"></div>
+      <div class="ai-status">
+        <div class="ai-orbit"><span></span></div>
+        <div><strong>AI 巡價中</strong><small>剛剛更新 182 條航線</small></div>
+      </div>
+      <nav class="secondary-nav">
+        <a href="#notifications"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>通知</a>
+        <a href="#settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.6v-.2h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></svg>設定</a>
+      </nav>
+      <div class="profile"><div class="avatar">KC</div><div><strong>Kevin Chen</strong><small>免費方案</small></div><button aria-label="開啟個人選單">•••</button></div>
+    </aside>
+
+    <main id="dashboard" class="main-content">
+      <header class="topbar">
+        <button class="mobile-menu" id="menuBtn" aria-label="開啟選單">☰</button>
+        <div class="eyebrow">2026 年 8 月 8 日・星期六</div>
+        <div class="top-actions">
+          <button class="icon-button" aria-label="通知"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><i></i></button>
+          <button class="primary-button" data-open-modal><span>＋</span> 新增監控</button>
+        </div>
+      </header>
+
+      <section class="welcome">
+        <div>
+          <p class="section-kicker">早安，Kevin</p>
+          <h1>今天也幫你盯著，<br><em>等一張好機票。</em></h1>
+        </div>
+        <p class="welcome-copy">3 條航線正在巡價，其中 <strong>1 條出現近期低點</strong>。不用一直重整，值得買時我們會告訴你。</p>
+      </section>
+
+      <section class="ask-card" aria-labelledby="ask-title">
+        <div class="ask-glow"></div>
+        <div class="ask-heading">
+          <div class="spark-icon">✦</div>
+          <div><span>FLYDAY AI</span><h2 id="ask-title">想去哪裡？直接跟我說</h2></div>
+        </div>
+        <form id="aiForm" class="ai-input-wrap">
+          <textarea id="aiPrompt" rows="1" aria-label="輸入旅程需求" placeholder="例如：10 月中從台北去東京，玩 5 天，來回希望在 9,000 元內"></textarea>
+          <button type="submit" aria-label="送出"><svg viewBox="0 0 24 24"><path d="m5 12 14-7-5 14-2-6-7-1Z"/></svg></button>
+        </form>
+        <div class="prompt-row"><span>試著問：</span><button class="prompt-chip">跨年去哪裡最便宜？</button><button class="prompt-chip">找週末快閃大阪</button><button class="prompt-chip">避開紅眼航班</button></div>
+        <div class="ai-reply" id="aiReply" hidden>
+          <div class="reply-loader"><span></span><span></span><span></span></div>
+          <div class="reply-content"></div>
+        </div>
+      </section>
+
+      <section id="watches" class="section-block">
+        <div class="section-title-row"><div><p class="section-kicker">PRICE WATCH</p><h2>正在監控</h2></div><button class="text-button" data-open-modal>管理全部 <span>→</span></button></div>
+        <div class="watch-grid" id="watchGrid"></div>
+      </section>
+
+      <section class="insight-layout" id="insights">
+        <article class="panel trend-panel">
+          <div class="panel-head"><div><p class="section-kicker">PRICE TREND</p><h2>台北 → 東京</h2></div><div class="range-tabs"><button>7天</button><button class="active">30天</button><button>90天</button></div></div>
+          <div class="chart-meta"><div><span>目前最低</span><strong>NT$ 8,420</strong><small class="down">↓ 12.4%</small></div><span>近 30 天</span></div>
+          <div class="chart-wrap">
+            <svg viewBox="0 0 760 220" preserveAspectRatio="none" aria-label="東京票價 30 天趨勢圖">
+              <defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6b45" stop-opacity=".25"/><stop offset="1" stop-color="#ff6b45" stop-opacity="0"/></linearGradient></defs>
+              <g class="grid-lines"><path d="M0 25H760M0 92H760M0 159H760"/></g>
+              <path class="area" d="M0 70 C35 62 45 85 82 76 S132 45 165 60 S217 112 251 100 S290 78 326 91 S368 147 407 137 S458 104 491 116 S538 166 575 153 S623 125 658 141 S714 184 760 175 L760 220 L0 220Z"/>
+              <path class="line" d="M0 70 C35 62 45 85 82 76 S132 45 165 60 S217 112 251 100 S290 78 326 91 S368 147 407 137 S458 104 491 116 S538 166 575 153 S623 125 658 141 S714 184 760 175"/>
+              <line class="target-line" x1="0" y1="148" x2="760" y2="148"/><text x="10" y="141">你的目標 NT$ 9,000</text>
+              <circle class="chart-dot" cx="760" cy="175" r="6"/><circle class="chart-dot-ring" cx="760" cy="175" r="11"/>
+            </svg>
+            <div class="chart-labels"><span>7/10</span><span>7/17</span><span>7/24</span><span>7/31</span><span>今天</span></div>
+          </div>
+        </article>
+
+        <aside class="panel ai-insight">
+          <div class="insight-badge"><span>✦</span> AI 票價判讀</div>
+          <div class="score-ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42"/><circle class="progress" cx="50" cy="50" r="42"/></svg><div><strong>87</strong><span>好價分數</span></div></div>
+          <h3>現在是好時機</h3>
+          <p>目前價格低於近 30 天平均 <strong>12.4%</strong>，且距離出發僅 68 天，繼續下跌空間有限。</p>
+          <div class="confidence"><span><i></i>AI 信心</span><strong>高</strong></div>
+          <button class="dark-button" id="viewFlightsBtn">查看 6 個推薦航班 <span>→</span></button>
+        </aside>
+      </section>
+
+      <section id="explore" class="section-block deals-section">
+        <div class="section-title-row"><div><p class="section-kicker">SMART PICKS</p><h2>你可能會喜歡</h2></div><div class="deal-filter"><button class="active">全部</button><button>日本</button><button>東南亞</button><button>週末快閃</button></div></div>
+        <div class="deal-list" id="dealList">
+          <article class="deal-row" data-region="日本">
+            <div class="airline peach">MM</div><div class="route-main"><strong>台北 <span>→</span> 大阪</strong><span>樂桃航空・直飛・2h 40m</span></div>
+            <div class="date-cell"><span>週末快閃</span><strong>9/18 — 9/21</strong></div><div class="deal-score high">近 60 天最低</div>
+            <div class="deal-price"><span>來回含稅</span><strong>NT$ 5,680</strong></div><button class="round-arrow" aria-label="查看大阪航班">→</button>
+          </article>
+          <article class="deal-row" data-region="東南亞">
+            <div class="airline viet">VJ</div><div class="route-main"><strong>台北 <span>→</span> 峴港</strong><span>越捷航空・直飛・2h 55m</span></div>
+            <div class="date-cell"><span>請 1 休 4</span><strong>10/9 — 10/12</strong></div><div class="deal-score">比平常省 21%</div>
+            <div class="deal-price"><span>來回含稅</span><strong>NT$ 6,240</strong></div><button class="round-arrow" aria-label="查看峴港航班">→</button>
+          </article>
+          <article class="deal-row" data-region="日本">
+            <div class="airline star">★</div><div class="route-main"><strong>台北 <span>→</span> 福岡</strong><span>星宇航空・直飛・2h 10m</span></div>
+            <div class="date-cell"><span>中秋連假</span><strong>9/25 — 9/28</strong></div><div class="deal-score">全服務航空</div>
+            <div class="deal-price"><span>來回含稅</span><strong>NT$ 8,910</strong></div><button class="round-arrow" aria-label="查看福岡航班">→</button>
+          </article>
+        </div>
+      </section>
+
+      <footer><span>Flyday beta・價格僅供展示</span><span>資料每 4 小時更新一次</span></footer>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="watchModal" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head"><div><p class="section-kicker">NEW PRICE WATCH</p><h2 id="modalTitle">新增機票監控</h2></div><button class="close-modal" aria-label="關閉">×</button></div>
+      <form id="watchForm">
+        <div class="trip-type"><button type="button" class="active">來回</button><button type="button">單程</button><button type="button">多城市</button></div>
+        <div class="field-grid route-fields">
+          <label><span>從哪裡出發</span><input id="fromInput" value="台北 TPE" required></label>
+          <button type="button" class="swap-button" id="swapBtn" aria-label="交換出發與抵達">⇄</button>
+          <label><span>想去哪裡</span><input id="toInput" placeholder="城市或機場" required></label>
+        </div>
+        <div class="field-grid two-col"><label><span>去程日期</span><input id="departInput" type="date" value="2026-10-15" required></label><label><span>回程日期</span><input id="returnInput" type="date" value="2026-10-20" required></label></div>
+        <div class="field-grid two-col"><label><span>理想價格</span><div class="input-prefix"><b>NT$</b><input id="priceInput" type="number" placeholder="9,000" required></div></label><label><span>旅客 / 艙等</span><select><option>1 位・經濟艙</option><option>2 位・經濟艙</option><option>1 位・豪華經濟艙</option></select></label></div>
+        <label class="check-row"><input type="checkbox" checked><span><b>日期可以彈性 ± 3 天</b><small>通常可多找到 34% 的低價選項</small></span><i></i></label>
+        <button class="modal-submit" type="submit"><span>✦</span> 開始 AI 智慧巡價</button>
+      </form>
+    </section>
+  </div>
+  <div class="toast" id="toast" role="status"><span>✓</span><div><strong>監控已建立</strong><small>有好價格時會立即通知你</small></div></div>
+  <script src="app.js"></script>
+</body>
+</html>
