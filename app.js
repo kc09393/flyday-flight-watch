@@ -1,26 +1,42 @@
 const defaultWatches = [
-  { icon:'🇯🇵', from:'TPE', fromCity:'台北', to:'NRT', toCity:'東京', dates:'10/15 — 10/20・5 晚', price:8420, change:'↓ 12.4%', hit:true },
-  { icon:'🇰🇷', from:'TPE', fromCity:'台北', to:'ICN', toCity:'首爾', dates:'11/07 — 11/11・4 晚', price:6170, change:'↓ 5.8%' },
-  { icon:'🇹🇭', from:'TPE', fromCity:'台北', to:'BKK', toCity:'曼谷', dates:'12/29 — 01/03・5 晚', price:12880, change:'↑ 2.1%', up:true }
+  { icon:'🇯🇵', from:'TPE', fromCity:'台北', to:'NRT', toCity:'東京', dates:'10/15 — 10/20・5 晚', price:8420, change:'範例價格', sample:true },
+  { icon:'🇰🇷', from:'TPE', fromCity:'台北', to:'ICN', toCity:'首爾', dates:'11/07 — 11/11・4 晚', price:6170, change:'範例價格', sample:true },
+  { icon:'🇹🇭', from:'TPE', fromCity:'台北', to:'BKK', toCity:'曼谷', dates:'12/29 — 01/03・5 晚', price:12880, change:'範例價格', sample:true }
 ];
 
-const saved = JSON.parse(localStorage.getItem('flyday-watches') || 'null');
-let watches = saved || defaultWatches;
+let saved = null;
+try { saved = JSON.parse(localStorage.getItem('flyday-watches') || 'null'); }
+catch { localStorage.removeItem('flyday-watches'); }
+let watches = Array.isArray(saved) ? saved.map(watch => {
+  if(watch.live || watch.sample) return watch;
+  if(watch.change === '開始追蹤') return { ...watch, change:'等待 API 啟用' };
+  if(/[↓↑]|%/.test(watch.change || '')) return { ...watch, change:'範例價格', hit:false, up:false, sample:true };
+  return watch;
+}) : defaultWatches;
 const $ = (selector, root=document) => root.querySelector(selector);
 const $$ = (selector, root=document) => [...root.querySelectorAll(selector)];
 
 function formatPrice(n){ return `NT$ ${Number(n).toLocaleString('zh-TW')}`; }
+function escapeHTML(value){ return String(value).replace(/[&<>'"]/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' })[char]); }
+
+function setPageClock(){
+  const now = new Date();
+  $('#todayLabel').textContent = new Intl.DateTimeFormat('zh-TW', {
+    year:'numeric', month:'long', day:'numeric', weekday:'long'
+  }).format(now).replace('星期', '・星期');
+  $('#greetingLabel').textContent = now.getHours() < 11 ? '早安' : now.getHours() < 18 ? '午安' : '晚安';
+}
 
 function renderWatches(){
   $('#watchGrid').innerHTML = watches.map((w, i) => `
     <article class="watch-card">
-      ${w.hit ? '<span class="hit-badge">達到目標價</span>' : ''}
-      <div class="watch-top"><div class="country-icon">${w.icon}</div><button class="watch-menu" data-remove="${i}" aria-label="航線選單">•••</button></div>
+      ${w.live && w.hit ? '<span class="hit-badge">達到目標價</span>' : w.sample ? '<span class="hit-badge">介面範例</span>' : ''}
+      <div class="watch-top"><div class="country-icon">${escapeHTML(w.icon)}</div><button class="watch-menu" data-remove="${i}" aria-label="航線選單">•••</button></div>
       <div class="watch-route">
-        <div class="airport"><strong>${w.from}</strong><span>${w.fromCity}</span></div><div class="route-line"></div><div class="airport"><strong>${w.to}</strong><span>${w.toCity}</span></div>
+        <div class="airport"><strong>${escapeHTML(w.from)}</strong><span>${escapeHTML(w.fromCity)}</span></div><div class="route-line"></div><div class="airport"><strong>${escapeHTML(w.to)}</strong><span>${escapeHTML(w.toCity)}</span></div>
       </div>
-      <div class="watch-date">${w.dates}</div>
-      <div class="watch-bottom"><div class="watch-price"><span>目前最低・來回含稅</span><strong>${formatPrice(w.price)}</strong></div><span class="price-change ${w.up?'up':''}">${w.change}</span></div>
+      <div class="watch-date">${escapeHTML(w.dates)}</div>
+      <div class="watch-bottom"><div class="watch-price"><span>${w.live ? '目前最低・來回含稅' : w.sample ? '範例參考價・非即時' : '你的目標價格'}</span><strong>${formatPrice(w.price)}</strong></div><span class="price-change ${w.up?'up':''}">${escapeHTML(w.change)}</span></div>
     </article>`).join('');
   $('#watchCount').textContent = watches.length;
   const welcomeCount = $('#welcomeCount');
@@ -28,6 +44,7 @@ function renderWatches(){
   localStorage.setItem('flyday-watches', JSON.stringify(watches));
 }
 
+setPageClock();
 renderWatches();
 
 const modal = $('#watchModal');
@@ -44,16 +61,42 @@ $('#swapBtn').addEventListener('click', () => {
   $('#toInput').value = from;
 });
 
+const cityCodes = { 台北:'TPE', 桃園:'TPE', 東京:'NRT', 大阪:'KIX', 首爾:'ICN', 曼谷:'BKK', 福岡:'FUK', 沖繩:'OKA', 香港:'HKG', 新加坡:'SIN', 河內:'HAN', 峴港:'DAD', 馬尼拉:'MNL', 胡志明:'SGN' };
+function parseLocation(value){
+  const cleaned = value.trim().replace(/[()]/g, ' ');
+  const codeMatch = cleaned.toUpperCase().match(/\b([A-Z]{3})\b/);
+  const city = cleaned.replace(/\b[A-Za-z]{3}\b/, '').trim() || codeMatch?.[1] || '';
+  const code = codeMatch?.[1] || cityCodes[city];
+  return code ? { city, code } : null;
+}
+[$('#fromInput'), $('#toInput')].forEach(input => input.addEventListener('input', () => $('#toInput').setCustomValidity('')));
+$('#returnInput').addEventListener('input', () => $('#returnInput').setCustomValidity(''));
+
 $('#watchForm').addEventListener('submit', e => {
   e.preventDefault();
-  const toRaw = $('#toInput').value.trim();
-  const [toCity, code='DST'] = toRaw.split(/\s+/);
+  const fromInfo = parseLocation($('#fromInput').value);
+  const toInfo = parseLocation($('#toInput').value);
+  if(!fromInfo || !toInfo){
+    $('#toInput').setCustomValidity('請輸入城市或三碼機場代碼，例如：東京 NRT');
+    $('#toInput').reportValidity();
+    return;
+  }
+  $('#toInput').setCustomValidity('');
   const depart = new Date($('#departInput').value);
   const back = new Date($('#returnInput').value);
+  if(back <= depart){
+    $('#returnInput').setCustomValidity('回程日期必須晚於去程日期');
+    $('#returnInput').reportValidity();
+    return;
+  }
+  $('#returnInput').setCustomValidity('');
   const nights = Math.max(1, Math.round((back - depart) / 86400000));
   const dateFmt = d => `${d.getMonth()+1}/${String(d.getDate()).padStart(2,'0')}`;
-  watches.unshift({ icon:'🌏', from:'TPE', fromCity:'台北', to:code.replace(/[()]/g,'').toUpperCase(), toCity, dates:`${dateFmt(depart)} — ${dateFmt(back)}・${nights} 晚`, price:Number($('#priceInput').value), change:'開始追蹤' });
-  renderWatches(); closeModal(); showToast(); e.target.reset();
+  watches.unshift({ icon:routeIcons[toInfo.code] || '🌏', from:fromInfo.code, fromCity:fromInfo.city, to:toInfo.code, toCity:toInfo.city, dates:`${dateFmt(depart)} — ${dateFmt(back)}・${nights} 晚`, price:Number($('#priceInput').value), change:'等待 API 啟用' });
+  renderWatches(); closeModal();
+  $('#toast strong').textContent='已儲存在這台手機';
+  $('#toast small').textContent='接上航班 API 後才會開始自動巡價';
+  showToast(); e.target.reset();
 });
 
 function showToast(){ const toast=$('#toast'); toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 3200); }
@@ -72,9 +115,9 @@ aiForm.addEventListener('submit', e => {
   const reply=$('#aiReply'); reply.hidden=false; $('.reply-loader',reply).style.display='block'; $('.reply-content',reply).innerHTML='';
   setTimeout(()=>{
     $('.reply-loader',reply).style.display='none';
-    let response='我理解了：你想找一趟兼顧價格與時間的旅程。我會比較鄰近日期、行李費與轉機風險，而不只看最低標價。';
-    if(/大阪|日本|東京/.test(prompt)) response='找到方向了：<strong>台北出發、日本、避開紅眼</strong>。目前 9 月大阪週末來回約 NT$ 5,680，是近 60 天低點；東京 10 月中則建議把 10/14 納入彈性日期。';
-    if(/跨年/.test(prompt)) response='跨年熱門線已偏高。若目的地彈性，<strong>馬尼拉 NT$ 6,900、河內 NT$ 7,430</strong> 的價格相對合理；曼谷目前建議再等等。';
+    let response='<strong>功能預覽：</strong>我理解了你的旅程需求。接上 AI 與航班 API 後，會比較鄰近日期、行李費與轉機風險，而不只看最低標價。';
+    if(/大阪|日本|東京/.test(prompt)) response='<strong>功能預覽：</strong>已理解「台北出發、日本、避開紅眼」。正式啟用後會用即時航班資料比較日期與總價。';
+    if(/跨年/.test(prompt)) response='<strong>功能預覽：</strong>已理解你想比較跨年目的地。正式啟用後會列出當時查到的真實價格，不會使用畫面上的範例數字。';
     $('.reply-content',reply).innerHTML=`${response}<button type="button" data-ai-watch>建立監控</button>`;
     $('[data-ai-watch]',reply).addEventListener('click',openModal);
   }, 850);
@@ -90,7 +133,7 @@ $('#viewFlightsBtn').addEventListener('click',()=>document.querySelector('#explo
 $('#menuBtn').addEventListener('click',()=>$('.sidebar').classList.toggle('open'));
 $$('.nav-item').forEach(link=>link.addEventListener('click',()=>{ $$('.nav-item').forEach(a=>a.classList.remove('active'));link.classList.add('active');$('.sidebar').classList.remove('open'); }));
 
-const routeIcons = { NRT:'🇯🇵', HND:'🇯🇵', ICN:'🇰🇷', GMP:'🇰🇷', BKK:'🇹🇭', DMK:'🇹🇭' };
+const routeIcons = { NRT:'🇯🇵', HND:'🇯🇵', KIX:'🇯🇵', FUK:'🇯🇵', OKA:'🇯🇵', CTS:'🇯🇵', ICN:'🇰🇷', GMP:'🇰🇷', BKK:'🇹🇭', DMK:'🇹🇭', HKG:'🇭🇰', SIN:'🇸🇬', HAN:'🇻🇳', DAD:'🇻🇳', SGN:'🇻🇳', MNL:'🇵🇭' };
 
 function displayDateRange(departureDate, returnDate){
   const short = value => {
@@ -111,6 +154,8 @@ async function hydrateLivePrices(){
     }
     if(live.status === 'needs_configuration'){
       $('#dataStatus').textContent = 'Flyday beta・等待航班 API 憑證';
+      $('#monitorStatusTitle').textContent = '準備啟用巡價';
+      $('#monitorStatusDetail').textContent = '補上航班 API 後每 6 小時更新';
       return;
     }
     if(!Array.isArray(live.results) || !live.results.length) return;
@@ -131,12 +176,18 @@ async function hydrateLivePrices(){
         change,
         hit: Boolean(result.targetHit),
         up: Number(result.changePct) > 0,
+        live: true,
+        sample: false,
         aiAdvice: result.aiAdvice || null
       };
       if(existing) Object.assign(existing, normalized);
       else watches.push(normalized);
     });
     renderWatches();
+    const hitCount = live.results.filter(result => result.targetHit).length;
+    $('#welcomeSummary').innerHTML = `<span id="welcomeCount">${watches.length}</span> 條航線正在巡價，其中 <strong>${hitCount} 條已達目標價</strong>。不用一直重整，值得買時我們會告訴你。`;
+    $('#monitorStatusTitle').textContent = 'AI 巡價中';
+    $('#monitorStatusDetail').textContent = `剛剛更新 ${live.results.length} 條監控航線`;
     $('#dataStatus').textContent = live.status === 'partial' ? '真實票價・部分航線更新' : `真實票價・${live.provider || '航班 API'}`;
     const featured = live.results.find(result => result.destination === 'NRT') || live.results[0];
     if(featured?.currentPrice){
@@ -158,13 +209,26 @@ if('serviceWorker' in navigator){
 
 let deferredInstallPrompt;
 const installButton = $('#installAppBtn');
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+if(isIOS && !isStandalone){
+  installButton.hidden = false;
+  installButton.textContent = '加入主畫面';
+}
 window.addEventListener('beforeinstallprompt', event => {
   event.preventDefault();
   deferredInstallPrompt = event;
   installButton.hidden = false;
 });
 installButton?.addEventListener('click', async () => {
-  if(!deferredInstallPrompt) return;
+  if(!deferredInstallPrompt){
+    if(isIOS){
+      $('#toast strong').textContent = '安裝到 iPhone';
+      $('#toast small').textContent = '按 Safari 分享按鈕，再選「加入主畫面」';
+      showToast();
+    }
+    return;
+  }
   deferredInstallPrompt.prompt();
   await deferredInstallPrompt.userChoice;
   deferredInstallPrompt = null;
