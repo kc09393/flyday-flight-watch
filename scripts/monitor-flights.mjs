@@ -3,7 +3,8 @@ import fs from 'node:fs/promises';
 const CONFIG_PATH = new URL('../config/watches.json', import.meta.url);
 const LATEST_PATH = new URL('../data/latest.json', import.meta.url);
 const HISTORY_PATH = new URL('../data/history.json', import.meta.url);
-const API_BASE = process.env.AMADEUS_API_BASE || 'https://api.amadeus.com';
+const API_BASE = process.env.SERPAPI_API_BASE || 'https://serpapi.com/search.json';
+const MAX_DAILY_WATCHES = Math.max(1, Number(process.env.SERPAPI_MAX_DAILY_WATCHES) || 8);
 
 const readJson = async (path, fallback) => {
   try { return JSON.parse(await fs.readFile(path, 'utf8')); }
@@ -12,56 +13,49 @@ const readJson = async (path, fallback) => {
 
 const writeJson = (path, data) => fs.writeFile(path, `${JSON.stringify(data, null, 2)}\n`, 'utf8');
 
-async function getAmadeusToken() {
-  const body = new URLSearchParams({
-    grant_type: 'client_credentials',
-    client_id: process.env.AMADEUS_CLIENT_ID,
-    client_secret: process.env.AMADEUS_CLIENT_SECRET
-  });
-  const response = await fetch(`${API_BASE}/v1/security/oauth2/token`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body
-  });
-  if (!response.ok) throw new Error(`Amadeus authentication failed (${response.status})`);
-  return (await response.json()).access_token;
-}
-
-async function searchWatch(token, watch, settings) {
+async function searchWatch(apiKey, watch, settings) {
   const query = new URLSearchParams({
-    originLocationCode: watch.origin,
-    destinationLocationCode: watch.destination,
-    departureDate: watch.departureDate,
-    returnDate: watch.returnDate,
+    engine: 'google_flights',
+    api_key: apiKey,
+    departure_id: watch.origin,
+    arrival_id: watch.destination,
+    outbound_date: watch.departureDate,
+    return_date: watch.returnDate,
     adults: String(settings.adults || 1),
-    currencyCode: settings.currency || 'TWD',
-    max: '30'
+    currency: settings.currency || 'TWD',
+    gl: 'tw',
+    hl: 'zh-tw',
+    type: '1',
+    travel_class: '1',
+    sort_by: '2',
+    stops: watch.nonStop ? '1' : '0'
   });
-  if (watch.nonStop) query.set('nonStop', 'true');
-  const response = await fetch(`${API_BASE}/v2/shopping/flight-offers?${query}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  const response = await fetch(`${API_BASE}?${query}`);
+  const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const detail = await response.text();
-    throw new Error(`${watch.id} search failed (${response.status}): ${detail.slice(0, 180)}`);
+    throw new Error(`${watch.id} search failed (${response.status}): ${payload.error || 'SerpApi request failed'}`);
   }
-  const payload = await response.json();
-  const offers = (payload.data || []).map(offer => ({
-    id: offer.id,
-    price: Number(offer.price?.grandTotal || offer.price?.total),
-    currency: offer.price?.currency || settings.currency || 'TWD',
-    validatingAirlines: offer.validatingAirlineCodes || [],
-    itineraries: (offer.itineraries || []).map(itinerary => ({
-      duration: itinerary.duration,
-      segments: (itinerary.segments || []).map(segment => ({
-        carrier: segment.carrierCode,
-        number: segment.number,
-        from: segment.departure?.iataCode,
-        departureAt: segment.departure?.at,
-        to: segment.arrival?.iataCode,
-        arrivalAt: segment.arrival?.at
+  if (payload.error) throw new Error(`${watch.id} search failed: ${payload.error}`);
+
+  const groups = [...(payload.best_flights || []), ...(payload.other_flights || [])];
+  const offers = groups.map((offer, index) => ({
+    id: offer.departure_token || offer.booking_token || `${watch.id}-${index + 1}`,
+    price: Number(offer.price),
+    currency: settings.currency || 'TWD',
+    validatingAirlines: [...new Set((offer.flights || []).map(segment => segment.airline).filter(Boolean))],
+    itineraries: [{
+      durationMinutes: offer.total_duration || null,
+      segments: (offer.flights || []).map(segment => ({
+        carrier: segment.airline,
+        number: segment.flight_number,
+        from: segment.departure_airport?.id,
+        departureAt: segment.departure_airport?.time,
+        to: segment.arrival_airport?.id,
+        arrivalAt: segment.arrival_airport?.time,
+        durationMinutes: segment.duration,
+        travelClass: segment.travel_class
       }))
-    }))
+    }]
   })).filter(offer => Number.isFinite(offer.price)).sort((a, b) => a.price - b.price);
 
   const cheapest = offers[0];
@@ -71,6 +65,8 @@ async function searchWatch(token, watch, settings) {
     currency: cheapest?.currency || settings.currency || 'TWD',
     offerCount: offers.length,
     cheapestOffer: cheapest || null,
+    priceInsights: payload.price_insights || null,
+    searchUrl: payload.search_metadata?.google_flights_url || null,
     targetHit: cheapest ? cheapest.price <= watch.targetPrice : false,
     checkedAt: new Date().toISOString()
   };
@@ -169,20 +165,22 @@ async function main() {
   const config = await readJson(CONFIG_PATH, { watches: [] });
   const previousLatest = await readJson(LATEST_PATH, { results: [] });
   const history = await readJson(HISTORY_PATH, []);
-  if (!process.env.AMADEUS_CLIENT_ID || !process.env.AMADEUS_CLIENT_SECRET) {
-    console.log('Amadeus credentials are not configured; workflow wiring is ready.');
+  if (!process.env.SERPAPI_API_KEY) {
+    console.log('SerpApi credentials are not configured; workflow wiring is ready.');
     return;
   }
 
-  const token = await getAmadeusToken();
-  const settled = await Promise.allSettled(config.watches.map(watch => searchWatch(token, watch, config)));
+  const configuredWatches = Array.isArray(config.watches) ? config.watches : [];
+  const activeWatches = configuredWatches.slice(0, MAX_DAILY_WATCHES);
+  const skippedErrors = configuredWatches.slice(MAX_DAILY_WATCHES).map(watch => `${watch.id} skipped to protect the free monthly search quota`);
+  const settled = await Promise.allSettled(activeWatches.map(watch => searchWatch(process.env.SERPAPI_API_KEY, watch, config)));
   const rawResults = settled.filter(item => item.status === 'fulfilled').map(item => item.value);
-  const errors = settled.filter(item => item.status === 'rejected').map(item => item.reason.message);
+  const errors = [...settled.filter(item => item.status === 'rejected').map(item => item.reason.message), ...skippedErrors];
   let results = addInsights(rawResults, history);
   results = await explainWithAI(results);
   const checkedAt = new Date().toISOString();
   const newHistory = [...history, ...results.filter(r => r.currentPrice).map(r => ({ watchId: r.id, price: r.currentPrice, checkedAt }))].slice(-1500);
-  const latest = { status: errors.length ? 'partial' : 'live', provider: 'Amadeus', updatedAt: checkedAt, errors, results };
+  const latest = { status: errors.length ? 'partial' : 'live', provider: 'Google Flights via SerpApi', updatedAt: checkedAt, errors, results };
   await Promise.all([writeJson(LATEST_PATH, latest), writeJson(HISTORY_PATH, newHistory)]);
   await notify(results, previousLatest);
   console.log(`Updated ${results.length} routes at ${checkedAt}`);
