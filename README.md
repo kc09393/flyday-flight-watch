@@ -8,7 +8,7 @@ Flyday 是手機優先、可安裝的機票巡價網站。使用者以 Email 安
 - Email magic link 登入與跨裝置同步
 - 新增、編輯、刪除、暫停與恢復監控
 - 三欄極簡建單：出發地、目的地、日期
-- 智慧建議入手價：先依航線與季節估算，巡價後依 Google Flights 真實區間自動校正
+- 系統建議價：先依航線與季節估算，巡價後依 Google Flights 真實區間自動校正
 - 達標通知中心與瀏覽器前景通知
 - 每條監控直接開啟 Google Flights
 - 手機底部導覽、PWA 安裝與安全離線外殼
@@ -36,11 +36,10 @@ Flyday 是手機優先、可安裝的機票巡價網站。使用者以 Email 安
 
 - `SUPABASE_URL`
 
-選用通知／AI Secrets：
+選用通知 Secrets：
 
 - `LINE_CHANNEL_ACCESS_TOKEN`、`LINE_USER_ID`
 - `RESEND_API_KEY`、`ALERT_EMAIL`
-- `OPENAI_API_KEY`
 
 前端只包含 Supabase publishable key；可繞過 RLS 的 secret key 僅存放於 GitHub Actions Secret。
 

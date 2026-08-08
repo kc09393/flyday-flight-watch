@@ -44,3 +44,40 @@
   .price-row{gap:14px}
   .target-price{max-width:140px}
 }
+/* Natural trip sentence */
+.simple-start-card{display:grid;grid-template-columns:minmax(220px,.75fr) minmax(380px,1.25fr);align-items:center}
+.trip-form{min-width:0}
+.trip-input-wrap{display:flex;background:#fff;border-radius:14px;padding:5px;box-shadow:0 12px 32px rgba(0,0,0,.12)}
+.trip-input-wrap input{min-width:0;flex:1;height:48px;border:0;outline:0;background:transparent;color:var(--ink);padding:0 13px;font-size:13px}
+.trip-input-wrap button{flex:0 0 auto;border:0;border-radius:11px;background:var(--accent);color:#fff;padding:0 16px;font-size:11px;font-weight:800}
+.trip-input-wrap button span{font-size:15px;margin-left:6px}
+.trip-form>small{display:block;margin:8px 4px 0;color:#91a49d;font-size:9px}
+.trip-form>small.error{color:#ffb19f}
+@media(max-width:820px){
+  .simple-start-card{display:block}
+  .trip-form{margin-top:18px}
+}
+@media(max-width:430px){
+  .trip-input-wrap{display:block;background:transparent;padding:0;box-shadow:none}
+  .trip-input-wrap input{width:100%;height:49px;background:#fff;border-radius:11px;padding:0 12px}
+  .trip-input-wrap button{width:100%;height:44px;margin-top:8px}
+}
+/* Standard route form */
+.simple-form-card{grid-template-columns:minmax(190px,.55fr) minmax(0,1.45fr);gap:24px}
+.quick-watch-form{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;align-items:end;min-width:0}
+.quick-watch-form label{min-width:0}
+.quick-watch-form label>span{display:block;color:#aebdb7;font-size:9px;font-weight:700;margin:0 0 6px 2px}
+.quick-watch-form input,.quick-watch-form select{width:100%;height:46px;border:0;border-radius:11px;background:#fff;color:var(--ink);outline:0;padding:0 10px;font-size:11px;font-weight:700;min-width:0}
+.quick-watch-form input:focus,.quick-watch-form select:focus{box-shadow:0 0 0 3px rgba(255,104,69,.28)}
+.quick-watch-form button{height:46px;border:0;border-radius:11px;background:var(--accent);color:#fff;padding:0 15px;font-size:11px;font-weight:800;white-space:nowrap}
+.quick-watch-form button:disabled{opacity:.55}
+@media(max-width:980px){
+  .simple-form-card{display:block}
+  .quick-watch-form{margin-top:18px;grid-template-columns:1fr 1fr}
+  .quick-watch-form button{grid-column:1/-1}
+}
+@media(max-width:430px){
+  .quick-watch-form{grid-template-columns:1fr 1fr;gap:9px}
+  .quick-watch-form label:nth-child(1),.quick-watch-form label:nth-child(2){grid-column:1/-1}
+  .quick-watch-form input,.quick-watch-form select{height:47px;font-size:12px}
+}

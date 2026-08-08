@@ -67,7 +67,8 @@ function estimateTargetPrice(watch) {
   }
 
   const baseline = routePriceBaselines[watch.destination] || 9000;
-  return roundPrice(baseline * seasonalMultiplier(watch.departure_date || watch.departureDate));
+  const originMultiplier = watch.origin === 'KHH' ? 1.15 : watch.origin === 'RMQ' ? 1.18 : 1;
+  return roundPrice(baseline * originMultiplier * seasonalMultiplier(watch.departure_date || watch.departureDate));
 }
 
 function estimateReason(watch) {
@@ -84,7 +85,6 @@ let currentSession = null;
 let cloudClient = null;
 let activeView = 'home';
 let installPrompt = null;
-let smartPrefill = null;
 let publicUpdatedAt = null;
 
 function formatInputDate(date) {
@@ -136,7 +136,6 @@ function normalizePublic(item, index) {
     active: true,
     public: true,
     price_insights: item.priceInsights || null,
-    ai_advice: item.aiAdvice || null
   };
   watch.target_price = Number(item.recommendedTargetPrice) || estimateTargetPrice(watch);
   return watch;
@@ -206,7 +205,7 @@ function renderWatches() {
     return `<article class="watch-card ${watch.active ? '' : 'paused'}">
       <div class="watch-status-row"><span class="status-pill ${statusClass}">${statusText}</span>${ownerActions}</div>
       <div class="route-title"><span class="flag">${routeIcons[watch.destination] || '🌏'}</span><div><h3>${escapeHTML(watch.origin_city)} → ${escapeHTML(watch.destination_city)}</h3><p>${escapeHTML(watch.origin)} → ${escapeHTML(watch.destination)}・${dateLabel(watch.departure_date)}－${dateLabel(watch.return_date)}</p></div></div>
-      <div class="price-row"><div class="price-main"><span>${hasPrice ? '目前最低・來回含稅' : '價格狀態'}</span><strong class="${hasPrice ? '' : 'pending'}">${money(watch.current_price)}</strong></div><div class="target-price"><span>Flyday 建議入手價</span><strong>${money(recommendedPrice)}</strong><small class="estimate-note">${escapeHTML(estimateReason(watch))}</small></div></div>
+      <div class="price-row"><div class="price-main"><span>${hasPrice ? '目前最低・來回含稅' : '價格狀態'}</span><strong class="${hasPrice ? '' : 'pending'}">${money(watch.current_price)}</strong></div><div class="target-price"><span>系統建議價</span><strong>${money(recommendedPrice)}</strong><small class="estimate-note">${escapeHTML(estimateReason(watch))}</small></div></div>
       <div class="card-actions"><a class="flight-link" href="${escapeHTML(googleFlightsUrl(watch))}" target="_blank" rel="noopener">查看 Google Flights</a>${secondaryAction}</div>
     </article>`;
   }).join('');
@@ -235,7 +234,7 @@ function maybeNotify(hits) {
   hits.forEach(watch => {
     const key = `${watch.id}:${watch.current_price}:${watch.last_checked_at || ''}`;
     if (seen.has(key)) return;
-    new Notification(`Flyday：${watch.destination_city} 已到建議價`, { body:`目前 ${money(watch.current_price)}，Flyday 建議入手價是 ${money(estimateTargetPrice(watch))}`, icon:'./icon.svg' });
+    new Notification(`Flyday：${watch.destination_city} 已到建議價`, { body:`目前 ${money(watch.current_price)}，系統建議價是 ${money(estimateTargetPrice(watch))}`, icon:'./icon.svg' });
     next.push(key);
   });
   localStorage.setItem('flyday-notified', JSON.stringify(next.slice(-50)));
@@ -371,6 +370,72 @@ async function sendLoginLink(event) {
   $('#authMessage').innerHTML = `登入信已寄到 <strong>${escapeHTML(email)}</strong>。請打開信件並點擊連結，回來後就會自動同步。`;
 }
 
+function setupQuickWatchForm() {
+  const defaults = defaultDates(30, 5);
+  $('#quickDepartInput').min = formatInputDate(new Date());
+  $('#quickDepartInput').value = defaults.departureDate;
+  $('#quickReturnInput').min = defaults.departureDate;
+  $('#quickReturnInput').value = defaults.returnDate;
+}
+
+function readQuickWatchForm() {
+  const origin = parseLocation($('#quickFromInput').value);
+  const destination = parseLocation($('#quickToInput').value);
+  if (!origin || !destination) {
+    const invalid = !origin ? $('#quickFromInput') : $('#quickToInput');
+    invalid.setCustomValidity('請輸入城市名稱，並從建議中選擇');
+    invalid.reportValidity();
+    return null;
+  }
+  const departureDate = $('#quickDepartInput').value;
+  const returnDate = $('#quickReturnInput').value;
+  if (!departureDate || !returnDate || returnDate <= departureDate) {
+    $('#quickReturnInput').setCustomValidity('回程日期必須晚於去程日期');
+    $('#quickReturnInput').reportValidity();
+    return null;
+  }
+  const reference = publicResults.find(item => item.origin === origin.code && item.destination === destination.code);
+  const estimateSource = reference
+    ? { ...reference, origin:origin.code, destination:destination.code, departure_date:departureDate }
+    : { origin:origin.code, destination:destination.code, departure_date:departureDate };
+  return {
+    origin:origin.code,
+    origin_city:origin.city,
+    destination:destination.code,
+    destination_city:destination.city,
+    departure_date:departureDate,
+    return_date:returnDate,
+    target_price:estimateTargetPrice(estimateSource),
+    nonstop:false,
+    active:true
+  };
+}
+
+async function handleQuickWatchSubmit(event) {
+  event.preventDefault();
+  const watch = readQuickWatchForm();
+  if (!watch) return;
+  if (!currentSession) {
+    localStorage.setItem('flyday-pending-watch', JSON.stringify(watch));
+    openAuthModal();
+    showToast('行程已填好', '登入後就會開始監控');
+    return;
+  }
+  const button = $('#quickWatchButton');
+  button.disabled = true;
+  button.textContent = '儲存中…';
+  try {
+    await saveCloudWatch(watch);
+    showToast('監控已建立', watch.origin_city + ' → ' + watch.destination_city);
+    $('#quickToInput').value = '';
+  } catch (error) {
+    showToast('儲存失敗', error.message, 'error');
+  } finally {
+    button.disabled = false;
+    button.textContent = '開始監控';
+  }
+}
+
 function openWatchModal(prefill = {}, editing = false) {
   const defaults = defaultDates();
   $('#watchId').value = prefill.id || '';
@@ -384,12 +449,12 @@ function openWatchModal(prefill = {}, editing = false) {
   $('#returnInput').min = $('#departInput').value;
   $('#watchModalEyebrow').textContent = editing ? '編輯監控' : '新增監控';
   $('#watchModalTitle').textContent = editing ? '調整行程' : '想去哪裡？';
-  $('#watchSubmitButton').textContent = editing ? '重新估價並儲存' : '自動估價並開始監控';
+  $('#watchSubmitButton').textContent = editing ? '儲存變更' : '開始監控';
   updateEstimatedPrice();
   $('#watchModal').hidden = false;
   setTimeout(() => $('#toInput').focus(), 60);
 }
-function closeWatchModal() { $('#watchModal').hidden = true; smartPrefill = null; }
+function closeWatchModal() { $('#watchModal').hidden = true; }
 
 function updateEstimatedPrice() {
   const destination = parseLocation($('#toInput').value);
@@ -399,12 +464,13 @@ function updateEstimatedPrice() {
     $('#estimateReason').textContent = '第一次巡價後會再依真實票價自動校正';
     return;
   }
+  const origin = parseLocation($('#fromInput').value);
   const editingWatch = cloudWatches.find(item => String(item.id) === $('#watchId').value);
-  const matchingPublic = publicResults.find(item => item.destination === destination.code);
+  const matchingPublic = publicResults.find(item => item.origin === origin?.code && item.destination === destination.code);
   const priceReference = editingWatch || matchingPublic;
   const estimateSource = priceReference
-    ? { ...priceReference, destination:destination.code, departure_date:$('#departInput').value }
-    : { destination:destination.code, departure_date:$('#departInput').value };
+    ? { ...priceReference, origin:origin?.code, destination:destination.code, departure_date:$('#departInput').value }
+    : { origin:origin?.code, destination:destination.code, departure_date:$('#departInput').value };
   const estimate = estimateTargetPrice(estimateSource);
   $('#priceInput').value = estimate;
   $('#estimatedPriceLabel').textContent = money(estimate);
@@ -469,12 +535,12 @@ async function submitWatch(event) {
   try {
     await saveCloudWatch(watch);
     closeWatchModal();
-    showToast(watch.id ? '監控已重新估價' : '已建立智慧估價監控', '第一次取得真實票價後會自動校正');
+    showToast(watch.id ? '監控已更新' : '監控已建立', '第一次取得真實票價後會自動校正');
   } catch (error) {
     showToast('儲存失敗', error.message, 'error');
   } finally {
     button.disabled = false;
-    button.textContent = watch.id ? '重新估價並儲存' : '自動估價並開始監控';
+    button.textContent = watch.id ? '儲存變更' : '開始監控';
   }
 }
 
@@ -509,50 +575,6 @@ async function handleWatchAction(event) {
     await loadCloudWatches({ seed:false });
     showToast(watch.active ? '監控已暫停' : '監控已重新啟用');
   }
-}
-
-function parseSmartPrompt(prompt) {
-  const destinationCity = Object.keys(cityCodes).find(city => city !== '台北' && prompt.includes(city));
-  if (!destinationCity) return null;
-  const dates = defaultDates();
-  const dateMatch = prompt.match(/(\d{1,2})\s*月\s*(\d{1,2})\s*日/);
-  if (dateMatch) {
-    const now = new Date();
-    let year = now.getFullYear();
-    if (Number(dateMatch[1]) < now.getMonth() + 1) year += 1;
-    dates.departureDate = `${year}-${String(dateMatch[1]).padStart(2,'0')}-${String(dateMatch[2]).padStart(2,'0')}`;
-  }
-  if (/週末|周末|週五/.test(prompt) && !dateMatch) {
-    const friday = new Date();
-    const add = (5 - friday.getDay() + 7) % 7 || 7;
-    friday.setDate(friday.getDate() + add + 7);
-    dates.departureDate = formatInputDate(friday);
-  }
-  const nightsMatch = prompt.match(/([2-9]|兩|三|四|五|六|七|八|九)\s*天/);
-  const numberMap = { 兩:2, 三:3, 四:4, 五:5, 六:6, 七:7, 八:8, 九:9 };
-  const days = nightsMatch ? Number(nightsMatch[1]) || numberMap[nightsMatch[1]] : (/週末|周末/.test(prompt) ? 3 : 5);
-  const returning = new Date(`${dates.departureDate}T00:00:00`);
-  returning.setDate(returning.getDate() + Math.max(1, days - 1));
-  dates.returnDate = formatInputDate(returning);
-  const priceMatches = [...prompt.matchAll(/([0-9][0-9,]{2,})\s*(?:元|塊|以下|內)?/g)];
-  const price = priceMatches.length ? Number(priceMatches.at(-1)[1].replaceAll(',', '')) : 10000;
-  return { origin:'TPE', origin_city:'台北', destination:cityCodes[destinationCity], destination_city:destinationCity, departure_date:dates.departureDate, return_date:dates.returnDate, target_price:price, nonstop:false };
-}
-
-function handleSmartSubmit(event) {
-  event.preventDefault();
-  const prompt = $('#smartPrompt').value.trim();
-  if (!prompt) return;
-  const parsed = parseSmartPrompt(prompt);
-  const result = $('#smartResult');
-  result.hidden = false;
-  if (!parsed) {
-    result.textContent = '我還找不到目的地。請加入城市，例如「台北去重慶，玩 7 天，16,000 元內」。';
-    return;
-  }
-  smartPrefill = parsed;
-  result.innerHTML = `已整理：<strong>${escapeHTML(parsed.origin_city)} → ${escapeHTML(parsed.destination_city)}</strong>・${dateLabel(parsed.departure_date)}－${dateLabel(parsed.return_date)}・${money(parsed.target_price)} 以下<button type="button" id="useSmartResult">確認建立</button>`;
-  $('#useSmartResult').addEventListener('click', () => openWatchModal(smartPrefill));
 }
 
 async function toggleAccount() {
@@ -596,11 +618,13 @@ function bindEvents() {
   $('#authModal').addEventListener('click', event => { if (event.target === $('#authModal')) closeAuthModal(); });
   document.addEventListener('keydown', event => { if (event.key === 'Escape') { closeWatchModal(); closeAuthModal(); } });
   $('#watchForm').addEventListener('submit', submitWatch);
+  $('#quickWatchForm').addEventListener('submit', handleQuickWatchSubmit);
   $('#authForm').addEventListener('submit', sendLoginLink);
-  $('#smartForm')?.addEventListener('submit', handleSmartSubmit);
-  $$('.smart-chips button').forEach(button => button.addEventListener('click', () => { $('#smartPrompt').value = button.dataset.smart; $('#smartForm').requestSubmit(); }));
   $$('.quick-cities button').forEach(button => button.addEventListener('click', () => { $('#toInput').value = button.dataset.city; $('#toInput').setCustomValidity(''); updateEstimatedPrice(); }));
   [$('#fromInput'), $('#toInput')].forEach(input => input.addEventListener('input', () => { input.setCustomValidity(''); updateEstimatedPrice(); }));
+  [$('#quickFromInput'), $('#quickToInput')].forEach(input => input.addEventListener('input', () => input.setCustomValidity('')));
+  $('#quickDepartInput').addEventListener('change', () => { $('#quickReturnInput').min = $('#quickDepartInput').value; $('#quickReturnInput').setCustomValidity(''); });
+  $('#quickReturnInput').addEventListener('change', () => $('#quickReturnInput').setCustomValidity(''));
   $('#departInput').addEventListener('change', () => { $('#returnInput').min = $('#departInput').value; $('#returnInput').setCustomValidity(''); updateEstimatedPrice(); });
   $('#returnInput').addEventListener('change', () => $('#returnInput').setCustomValidity(''));
   $('#watchGrid').addEventListener('click', handleWatchAction);
@@ -623,6 +647,7 @@ function bindEvents() {
 
 async function init() {
   setPageClock();
+  setupQuickWatchForm();
   bindEvents();
   const hashView = location.hash.replace('#', '');
   if (['home','alerts','settings'].includes(hashView)) switchView(hashView);

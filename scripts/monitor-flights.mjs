@@ -50,7 +50,8 @@ function estimateTargetPrice(watch) {
     if (Number.isFinite(typicalLow)) estimate = Math.max(typicalLow, estimate);
     return roundPrice(estimate);
   }
-  return roundPrice((ROUTE_BASELINES[watch.destination] || 9000) * seasonalMultiplier(watch.departureDate));
+  const originMultiplier = watch.origin === 'KHH' ? 1.15 : watch.origin === 'RMQ' ? 1.18 : 1;
+  return roundPrice((ROUTE_BASELINES[watch.destination] || 9000) * originMultiplier * seasonalMultiplier(watch.departureDate));
 }
 
 const readJson = async (path, fallback) => {
@@ -194,24 +195,6 @@ function addInsights(results, history) {
   });
 }
 
-async function explainWithAI(results) {
-  if (!process.env.OPENAI_API_KEY || !results.length) return results;
-  const model = process.env.OPENAI_MODEL || 'gpt-5.6-terra';
-  const compact = results.map(({ id, origin, destination, currentPrice, targetPrice, average30d, priceVsAveragePct, targetHit }) => ({ id, origin, destination, currentPrice, targetPrice, average30d, priceVsAveragePct, targetHit }));
-  const response = await fetch('https://api.openai.com/v1/responses', {
-    method: 'POST',
-    headers: { Authorization:`Bearer ${process.env.OPENAI_API_KEY}`, 'Content-Type':'application/json' },
-    body: JSON.stringify({ model, input:`你是台灣旅客的機票價格分析助手。請根據以下真實 API 數字，為每個 id 各寫一句 35 字內繁體中文購買建議。不得捏造價格。只輸出 JSON 物件，鍵為 id，值為建議。資料：${JSON.stringify(compact)}`, max_output_tokens:350 })
-  });
-  if (!response.ok) return results;
-  const payload = await response.json();
-  const text = payload.output_text || payload.output?.flatMap(item => item.content || []).find(item => item.type === 'output_text')?.text;
-  try {
-    const advice = JSON.parse(text.replace(/^```json\s*|\s*```$/g, ''));
-    return results.map(result => ({ ...result, aiAdvice:advice[result.id] || null }));
-  } catch { return results; }
-}
-
 async function syncCloudSuccess(result) {
   const checkedAt = result.checkedAt || new Date().toISOString();
   await supabaseRequest(`flight_watches?id=eq.${encodeURIComponent(result.id)}`, {
@@ -302,7 +285,6 @@ async function main() {
   ];
 
   let publicResultsWithInsights = addInsights(publicRaw, history);
-  publicResultsWithInsights = await explainWithAI(publicResultsWithInsights);
   const checkedAt = new Date().toISOString();
   const newHistory = [...history, ...publicResultsWithInsights.filter(result => result.currentPrice).map(result => ({ watchId:result.id, price:result.currentPrice, checkedAt }))].slice(-1500);
   const latest = { status:errors.length ? 'partial' : 'live', provider:'Google Flights via SerpApi', updatedAt:checkedAt, errors, results:publicResultsWithInsights };
