@@ -47,7 +47,7 @@
       <div class="sidebar-spacer"></div>
       <div class="ai-status">
         <div class="ai-orbit"><span></span></div>
-        <div><strong>AI 巡價中</strong><small>剛剛更新 182 條航線</small></div>
+        <div><strong id="monitorStatusTitle">準備啟用巡價</strong><small id="monitorStatusDetail">補上航班 API 後每 6 小時更新</small></div>
       </div>
       <nav class="secondary-nav">
         <a href="#notifications"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>通知</a>
@@ -59,7 +59,7 @@
     <main id="dashboard" class="main-content">
       <header class="topbar">
         <button class="mobile-menu" id="menuBtn" aria-label="開啟選單">☰</button>
-        <div class="eyebrow">2026 年 8 月 8 日・星期六</div>
+        <div class="eyebrow" id="todayLabel"></div>
         <div class="top-actions">
           <button class="install-button" id="installAppBtn" hidden>安裝 App</button>
           <button class="icon-button" aria-label="通知"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><i></i></button>
@@ -69,10 +69,10 @@
 
       <section class="welcome">
         <div>
-          <p class="section-kicker">早安，Kevin</p>
+          <p class="section-kicker"><span id="greetingLabel">你好</span>，Kevin</p>
           <h1>今天也幫你盯著，<br><em>等一張好機票。</em></h1>
         </div>
-        <p class="welcome-copy"><span id="welcomeCount">3</span> 條航線正在巡價，其中 <strong>1 條出現近期低點</strong>。不用一直重整，值得買時我們會告訴你。</p>
+        <p class="welcome-copy" id="welcomeSummary"><span id="welcomeCount">3</span> 個行程已儲存在這台手機。接上航班 API 後，才會開始定時巡價與發送低價通知。</p>
       </section>
 
       <section class="ask-card" aria-labelledby="ask-title">
@@ -99,7 +99,7 @@
 
       <section class="insight-layout" id="insights">
         <article class="panel trend-panel">
-          <div class="panel-head"><div><p class="section-kicker">PRICE TREND</p><h2>台北 → 東京</h2></div><div class="range-tabs"><button>7天</button><button class="active">30天</button><button>90天</button></div></div>
+          <div class="panel-head"><div><p class="section-kicker">PRICE TREND・介面範例</p><h2>台北 → 東京</h2></div><div class="range-tabs"><button>7天</button><button class="active">30天</button><button>90天</button></div></div>
           <div class="chart-meta"><div><span>目前最低</span><strong>NT$ 8,420</strong><small class="down">↓ 12.4%</small></div><span>近 30 天</span></div>
           <div class="chart-wrap">
             <svg viewBox="0 0 760 220" preserveAspectRatio="none" aria-label="東京票價 30 天趨勢圖">
@@ -115,7 +115,7 @@
         </article>
 
         <aside class="panel ai-insight">
-          <div class="insight-badge"><span>✦</span> AI 票價判讀</div>
+          <div class="insight-badge"><span>✦</span> AI 票價判讀・功能預覽</div>
           <div class="score-ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42"/><circle class="progress" cx="50" cy="50" r="42"/></svg><div><strong>87</strong><span>好價分數</span></div></div>
           <h3>現在是好時機</h3>
           <p>目前價格低於近 30 天平均 <strong>12.4%</strong>，且距離出發僅 68 天，繼續下跌空間有限。</p>
@@ -125,7 +125,7 @@
       </section>
 
       <section id="explore" class="section-block deals-section">
-        <div class="section-title-row"><div><p class="section-kicker">SMART PICKS</p><h2>你可能會喜歡</h2></div><div class="deal-filter"><button class="active">全部</button><button>日本</button><button>東南亞</button><button>週末快閃</button></div></div>
+        <div class="section-title-row"><div><p class="section-kicker">SMART PICKS・範例</p><h2>你可能會喜歡</h2></div><div class="deal-filter"><button class="active">全部</button><button>日本</button><button>東南亞</button><button>週末快閃</button></div></div>
         <div class="deal-list" id="dealList">
           <article class="deal-row" data-region="日本">
             <div class="airline peach">MM</div><div class="route-main"><strong>台北 <span>→</span> 大阪</strong><span>樂桃航空・直飛・2h 40m</span></div>
