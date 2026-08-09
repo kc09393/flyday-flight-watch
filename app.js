@@ -230,8 +230,11 @@ function renderWatches() {
       ? watches.filter(item => !isMonthWatch(item) && item.origin === watch.origin && item.destination === watch.destination && hasRealPrice(item.current_price)).map(item => Number(item.current_price))
       : [];
     const flexibleSavings = hasPrice && exactRoutePrices.length ? Math.max(0, Math.min(...exactRoutePrices) - Number(watch.current_price)) : 0;
+    const queued = !hasPrice && /排入|額度|下一輪/.test(String(watch.last_error || ''));
+    const lookupFailed = !hasPrice && Boolean(watch.last_error) && !queued;
     const statusClass = hit ? 'hit' : hasPrice ? 'live' : '';
-    const statusText = !watch.active ? '已暫停' : hit ? '建議可以買' : flexibleSavings > 0 ? `比固定日期省 ${money(flexibleSavings)}` : hasPrice ? '每日巡價中' : '正在查最新票價';
+    const statusText = !watch.active ? '已暫停' : hit ? '建議可以買' : flexibleSavings > 0 ? `比固定日期省 ${money(flexibleSavings)}` : hasPrice ? '每日巡價中' : queued ? '排隊中，下一輪會查' : lookupFailed ? '暫時查不到，會再重試' : '正在取得第一次票價';
+    const pendingPriceText = queued ? '已排入下一輪' : lookupFailed ? '稍後自動重試' : '通常幾分鐘內完成';
     const editAction = isMonthWatch(watch) ? '' : `<button data-action="edit" data-id="${escapeHTML(watch.id)}">編輯</button>`;
     const ownerActions = currentSession && !watch.public ? `
       <div class="card-menu">${editAction}<button class="danger" data-action="delete" data-id="${escapeHTML(watch.id)}">刪除</button></div>` : '';
@@ -241,7 +244,7 @@ function renderWatches() {
     return `<article class="watch-card ${watch.active ? '' : 'paused'}">
       <div class="watch-status-row"><span class="status-pill ${statusClass}">${statusText}</span>${ownerActions}</div>
       <div class="route-title"><span class="flag">${routeIcons[watch.destination] || '🌏'}</span><div><h3>${escapeHTML(watch.origin_city)} → ${escapeHTML(watch.destination_city)}</h3><p>${isMonthWatch(watch) ? escapeHTML(monthWatchLabel(watch, hasPrice)) : `${escapeHTML(watch.origin)} → ${escapeHTML(watch.destination)}・${dateLabel(watch.departure_date)}－${dateLabel(watch.return_date)}`}</p></div></div>
-      <div class="price-row"><div class="price-main"><span>${hasPrice ? (isMonthWatch(watch) ? '本月找到最低・來回含稅' : '目前最低・來回含稅') : '價格狀態'}</span><strong class="${hasPrice ? '' : 'pending'}">${money(watch.current_price)}</strong></div><div class="target-price"><span>系統建議價</span><strong>${money(recommendedPrice)}</strong><small class="estimate-note">${escapeHTML(estimateReason(watch))}</small></div></div>
+      <div class="price-row"><div class="price-main"><span>${hasPrice ? (isMonthWatch(watch) ? '本月找到最低・來回含稅' : '目前最低・來回含稅') : '價格狀態'}</span><strong class="${hasPrice ? '' : 'pending'}">${hasPrice ? money(watch.current_price) : pendingPriceText}</strong></div><div class="target-price"><span>系統建議價</span><strong>${money(recommendedPrice)}</strong><small class="estimate-note">${escapeHTML(estimateReason(watch))}</small></div></div>
       <div class="card-actions"><a class="flight-link" href="${escapeHTML(googleFlightsUrl(watch))}" target="_blank" rel="noopener">查看 Google Flights</a>${secondaryAction}</div>
     </article>`;
   }).join('');

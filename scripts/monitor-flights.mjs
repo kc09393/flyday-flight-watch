@@ -82,7 +82,7 @@ async function supabaseRequest(path, options = {}) {
 
 async function loadCloudWatches() {
   if (!SUPABASE_URL || !SUPABASE_SECRET_KEY) return [];
-  const rows = await supabaseRequest('flight_watches?active=eq.true&select=*&order=created_at.asc');
+  const rows = await supabaseRequest('flight_watches?active=eq.true&select=*');
   return (rows || []).map(row => ({
     id: row.id,
     origin: row.origin,
@@ -100,8 +100,15 @@ async function loadCloudWatches() {
     adults: row.adults || 1,
     userId: row.user_id,
     previousCloudPrice: row.current_price,
+    lastCheckedAt: row.last_checked_at,
+    createdAt: row.created_at,
     source: 'cloud'
-  }));
+  })).sort((a, b) => {
+    const aChecked = a.lastCheckedAt ? new Date(a.lastCheckedAt).getTime() : 0;
+    const bChecked = b.lastCheckedAt ? new Date(b.lastCheckedAt).getTime() : 0;
+    if (aChecked !== bChecked) return aChecked - bChecked;
+    return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+  });
 }
 
 async function searchExactWatch(apiKey, watch, settings) {
@@ -293,6 +300,12 @@ async function syncCloudFailure(watch, message) {
   });
 }
 
+async function syncCloudQueued(watch) {
+  await supabaseRequest(`flight_watches?id=eq.${encodeURIComponent(watch.id)}`, {
+    method:'PATCH', headers:{ Prefer:'return=minimal' }, body:JSON.stringify({ last_error:'已排入下一輪巡價' })
+  });
+}
+
 async function sendLine(message) {
   if (!process.env.LINE_CHANNEL_ACCESS_TOKEN || !process.env.LINE_USER_ID) return;
   await fetch('https://api.line.me/v2/bot/message/push', { method:'POST', headers:{ Authorization:`Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`, 'Content-Type':'application/json' }, body:JSON.stringify({ to:process.env.LINE_USER_ID, messages:[{ type:'text', text:message }] }) });
@@ -359,7 +372,7 @@ async function main() {
   const cloudSyncTasks = [
     ...cloudResults.map(syncCloudSuccess),
     ...failed.flatMap(item => item.group.members.filter(member => member.source === 'cloud').map(member => syncCloudFailure(member, item.message))),
-    ...skippedGroups.flatMap(group => group.members.filter(member => member.source === 'cloud').map(member => syncCloudFailure(member, '今日免費巡價額度已滿，明天會再嘗試')))
+    ...skippedGroups.flatMap(group => group.members.filter(member => member.source === 'cloud').map(syncCloudQueued))
   ];
   const cloudSync = await Promise.allSettled(cloudSyncTasks);
   const cloudSyncErrors = cloudSync.filter(item => item.status === 'rejected');
