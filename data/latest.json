@@ -1,7 +1,7 @@
 {
   "status": "live",
   "provider": "Google Flights via SerpApi",
-  "updatedAt": "2026-08-23T23:34:14.427Z",
+  "updatedAt": "2026-08-24T23:33:47.940Z",
   "errors": [],
   "results": [
     {
@@ -12,15 +12,15 @@
       "destinationCity": "東京",
       "departureDate": "2026-10-15",
       "returnDate": "2026-10-20",
-      "targetPrice": 7100,
+      "targetPrice": 7000,
       "nonStop": false,
       "source": "public",
-      "currentPrice": 7666,
+      "currentPrice": 7663,
       "currency": "TWD",
       "offerCount": 22,
       "cheapestOffer": {
-        "id": "WyJDalJJV2s5SmEwRjBYMFJHYnpSQldEaFphWGRDUnkwdExTMHRMUzB0TFc5NVkyMHpOMEZCUVVGQlIzRk1aekk0UlY5dldFTkJFZ1ZKVkRjd01Cb0tDUEk3RUFBYUExUlhSRGdjY0ltOEFRPT0iLFtbIlRQRSIsIjIwMjYtMTAtMTUiLCJOUlQiLG51bGwsIklUIiwiNzAwIl1dXQ==",
-        "price": 7666,
+        "id": "WyJDalJJT1RKMlJFWnNZemMxU2pSQlFYbFBlbmRDUnkwdExTMHRMUzB0TFMxNWJHbHJNVUZCUVVGQlIzRk5NVTVaUW0xVmFHVkJFZ1ZKVkRjd01Cb0tDTzg3RUFBYUExUlhSRGdjY0lhOEFRPT0iLFtbIlRQRSIsIjIwMjYtMTAtMTUiLCJOUlQiLG51bGwsIklUIiwiNzAwIl1dXQ==",
+        "price": 7663,
         "currency": "TWD",
         "validatingAirlines": [
           "台灣虎航"
@@ -44,17 +44,13 @@
         ]
       },
       "priceInsights": {
-        "lowest_price": 7666,
+        "lowest_price": 7663,
         "price_level": "typical",
         "typical_price_range": [
           5800,
-          9200
+          9300
         ],
         "price_history": [
-          [
-            1782316800,
-            7711
-          ],
           [
             1782403200,
             7979
@@ -293,16 +289,20 @@
           ],
           [
             1787500800,
-            7666
+            7661
+          ],
+          [
+            1787587200,
+            7663
           ]
         ]
       },
       "searchUrl": "https://www.google.com/travel/flights?hl=zh-tw&gl=tw&curr=TWD&tfs=CBwQAhoeEgoyMDI2LTEwLTE1agcIARIDVFBFcgcIARIDTlJUGh4SCjIwMjYtMTAtMjBqBwgBEgNOUlRyBwgBEgNUUEVAAUgBcAGYAQE&tfu=EgIIAg",
-      "checkedAt": "2026-08-23T23:34:09.878Z",
-      "recommendedTargetPrice": 7100,
+      "checkedAt": "2026-08-24T23:33:43.156Z",
+      "recommendedTargetPrice": 7000,
       "estimateBasis": "google_price_range",
       "targetHit": false,
-      "average30d": 7729,
+      "average30d": 7726,
       "priceVsAveragePct": -0.8,
       "changePct": 0
     },
@@ -314,15 +314,15 @@
       "destinationCity": "首爾",
       "departureDate": "2026-11-07",
       "returnDate": "2026-11-11",
-      "targetPrice": 5700,
+      "targetPrice": 6000,
       "nonStop": false,
       "source": "public",
-      "currentPrice": 5658,
+      "currentPrice": 5965,
       "currency": "TWD",
       "offerCount": 12,
       "cheapestOffer": {
-        "id": "WyJDalJJYmsxTlMxbDRYekZLTUhOQlYwVnpRVUZDUnkwdExTMHRMUzB0TFMxdmVXWnlPRUZCUVVGQlIzRk1aekk0UW1KU1JVbEJFZ1ZVVWpnM01ob0tDSm9zRUFBYUExUlhSRGdjY09lS0FRPT0iLFtbIlRQRSIsIjIwMjYtMTEtMDciLCJJQ04iLG51bGwsIlRSIiwiODcyIl1dXQ==",
-        "price": 5658,
+        "id": "WyJDalJJYld4Q2RubFpNWGRxU0ZWQlFsaGFSRkZDUnkwdExTMHRiMnRpYlcweE1DMXVNa0ZCUVVGQlIzRk5NVTVaUVdGR1FXRkJFZ1ZVVWpnM01ob0tDTTB1RUFBYUExUlhSRGdjY0xHU0FRPT0iLFtbIlRQRSIsIjIwMjYtMTEtMDciLCJJQ04iLG51bGwsIlRSIiwiODcyIl1dXQ==",
+        "price": 5965,
         "currency": "TWD",
         "validatingAirlines": [
           "酷航"
@@ -346,17 +346,13 @@
         ]
       },
       "priceInsights": {
-        "lowest_price": 5658,
+        "lowest_price": 5965,
         "price_level": "low",
         "typical_price_range": [
           6000,
           9300
         ],
         "price_history": [
-          [
-            1782230400,
-            6792
-          ],
           [
             1782316800,
             6792
@@ -600,17 +596,21 @@
           [
             1787500800,
             5658
+          ],
+          [
+            1787587200,
+            5965
           ]
         ]
       },
       "searchUrl": "https://www.google.com/travel/flights?hl=zh-tw&gl=tw&curr=TWD&tfs=CBwQAhoeEgoyMDI2LTExLTA3agcIARIDVFBFcgcIARIDSUNOGh4SCjIwMjYtMTEtMTFqBwgBEgNJQ05yBwgBEgNUUEVAAUgBcAGYAQE&tfu=EgIIAg",
-      "checkedAt": "2026-08-23T23:34:07.741Z",
-      "recommendedTargetPrice": 5700,
+      "checkedAt": "2026-08-24T23:33:42.516Z",
+      "recommendedTargetPrice": 6000,
       "estimateBasis": "google_price_range",
       "targetHit": true,
-      "average30d": 6113,
-      "priceVsAveragePct": -7.4,
-      "changePct": 0
+      "average30d": 6094,
+      "priceVsAveragePct": -2.1,
+      "changePct": 5.4
     },
     {
       "id": "tpe-bkk-20261229",
@@ -627,7 +627,7 @@
       "currency": "TWD",
       "offerCount": 20,
       "cheapestOffer": {
-        "id": "WyJDalJJTlV0SVdYWXdaVWxoVlVsQldWODFXVUZDUnkwdExTMHRMUzB0TFMxdmEzVnRORUZCUVVGQlIzRk1aek5WUnpCVWVFZEJFZ3REV0RRd04zeERXRFkxTXhvS0NONVlFQUFhQTFSWFJEZ2NjTk9XQWc9PSIsW1siVFBFIiwiMjAyNi0xMi0yOSIsIkhLRyIsbnVsbCwiQ1giLCI0MDciXSxbIkhLRyIsIjIwMjYtMTItMjkiLCJCS0siLG51bGwsIkNYIiwiNjUzIl1dXQ==",
+        "id": "WyJDalJJUjJKNk9XZHpiQzFoUkVsQlFYbHhjbEZDUnkwdExTMHRMWFozYldjeU9DMXVNVUZCUVVGQlIzRk5NVTV6UTNwbFRrMUJFZ3REV0RRd04zeERXRFkxTXhvS0NONVlFQUFhQTFSWFJEZ2NjTnlXQWc9PSIsW1siVFBFIiwiMjAyNi0xMi0yOSIsIkhLRyIsbnVsbCwiQ1giLCI0MDciXSxbIkhLRyIsIjIwMjYtMTItMjkiLCJCS0siLG51bGwsIkNYIiwiNjUzIl1dXQ==",
         "price": 11358,
         "currency": "TWD",
         "validatingAirlines": [
@@ -669,10 +669,6 @@
           9900
         ],
         "price_history": [
-          [
-            1782316800,
-            13690
-          ],
           [
             1782403200,
             13690
@@ -912,17 +908,21 @@
           [
             1787500800,
             11358
+          ],
+          [
+            1787587200,
+            11358
           ]
         ]
       },
       "searchUrl": "https://www.google.com/travel/flights?hl=zh-tw&gl=tw&curr=TWD&tfs=CBwQAhoeEgoyMDI2LTEyLTI5agcIARIDVFBFcgcIARIDQktLGh4SCjIwMjctMDEtMDNqBwgBEgNCS0tyBwgBEgNUUEVAAUgBcAGYAQE&tfu=EgIIAg",
-      "checkedAt": "2026-08-23T23:34:14.184Z",
+      "checkedAt": "2026-08-24T23:33:47.940Z",
       "recommendedTargetPrice": 9800,
       "estimateBasis": "google_price_range",
       "targetHit": false,
-      "average30d": 9670,
-      "priceVsAveragePct": 17.5,
-      "changePct": 16.3
+      "average30d": 9740,
+      "priceVsAveragePct": 16.6,
+      "changePct": 0
     }
   ]
 }
