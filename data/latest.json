@@ -1,7 +1,7 @@
 {
   "status": "live",
   "provider": "Google Flights via SerpApi",
-  "updatedAt": "2026-08-28T06:55:19.517Z",
+  "updatedAt": "2026-08-29T04:08:50.684Z",
   "errors": [],
   "results": [
     {
@@ -12,31 +12,31 @@
       "destinationCity": "東京",
       "departureDate": "2026-10-15",
       "returnDate": "2026-10-20",
-      "targetPrice": 7200,
+      "targetPrice": 6900,
       "nonStop": false,
       "source": "public",
-      "currentPrice": 7811,
+      "currentPrice": 7506,
       "currency": "TWD",
       "offerCount": 22,
       "cheapestOffer": {
-        "id": "WyJDalJJYTNoTU5FZEtlVkEwVkRSQlJXUmFRMmRDUnkwdExTMHRMUzB0TFMwdGIzbG9OMEZCUVVGQlIzRlNUVTA0Um01eFptMUJFZ1ZKVkRjd01Cb0tDSU05RUFBYUExUlhSRGdjY0lmQkFRPT0iLFtbIlRQRSIsIjIwMjYtMTAtMTUiLCJOUlQiLG51bGwsIklUIiwiNzAwIl1dXQ==",
-        "price": 7811,
+        "id": "WyJDalJJWVZsdlJXRjJOMEZ3YzAxQlJqRjJNbmRDUnkwdExTMHRMUzEyZEdoNE5pMXVNa0ZCUVVGQlIzRlRWekIzVFMxWlYxTkJFZ1ZVVWpnM05Cb0tDTkk2RUFBYUExUlhSRGdjY0t5NUFRPT0iLFtbIlRQRSIsIjIwMjYtMTAtMTUiLCJOUlQiLG51bGwsIlRSIiwiODc0Il1dXQ==",
+        "price": 7506,
         "currency": "TWD",
         "validatingAirlines": [
-          "台灣虎航"
+          "酷航"
         ],
         "itineraries": [
           {
-            "durationMinutes": 205,
+            "durationMinutes": 210,
             "segments": [
               {
-                "carrier": "台灣虎航",
-                "number": "IT 700",
+                "carrier": "酷航",
+                "number": "TR 874",
                 "from": "TPE",
                 "departureAt": "2026-10-15 15:30",
                 "to": "NRT",
-                "arrivalAt": "2026-10-15 19:55",
-                "durationMinutes": 205,
+                "arrivalAt": "2026-10-15 20:00",
+                "durationMinutes": 210,
                 "travelClass": "Economy"
               }
             ]
@@ -44,17 +44,13 @@
         ]
       },
       "priceInsights": {
-        "lowest_price": 7811,
+        "lowest_price": 7506,
         "price_level": "typical",
         "typical_price_range": [
           5800,
           9400
         ],
         "price_history": [
-          [
-            1782662400,
-            7983
-          ],
           [
             1782748800,
             11108
@@ -293,18 +289,22 @@
           ],
           [
             1787846400,
-            7811
+            7607
+          ],
+          [
+            1787932800,
+            7506
           ]
         ]
       },
       "searchUrl": "https://www.google.com/travel/flights?hl=zh-tw&gl=tw&curr=TWD&tfs=CBwQAhoeEgoyMDI2LTEwLTE1agcIARIDVFBFcgcIARIDTlJUGh4SCjIwMjYtMTAtMjBqBwgBEgNOUlRyBwgBEgNUUEVAAUgBcAGYAQE&tfu=EgIIAg",
-      "checkedAt": "2026-08-28T06:55:11.725Z",
-      "recommendedTargetPrice": 7200,
+      "checkedAt": "2026-08-29T04:08:45.787Z",
+      "recommendedTargetPrice": 6900,
       "estimateBasis": "google_price_range",
       "targetHit": false,
-      "average30d": 7746,
-      "priceVsAveragePct": 0.8,
-      "changePct": -5
+      "average30d": 7749,
+      "priceVsAveragePct": -3.1,
+      "changePct": -3.9
     },
     {
       "id": "tpe-icn-20261107",
@@ -317,27 +317,27 @@
       "targetPrice": 6000,
       "nonStop": false,
       "source": "public",
-      "currentPrice": 5967,
+      "currentPrice": 6970,
       "currency": "TWD",
       "offerCount": 12,
       "cheapestOffer": {
-        "id": "WyJDalJJVW5ZeWVHeFBTRzV2YWxWQlEyUnNOVkZDUnkwdExTMHRMUzB0TFMxMmQyMTBNMEZCUVVGQlIzRlNUVTB3VFZKdFZXZEJFZ1ZVVWpnM01ob0tDTTh1RUFBYUExUlhSRGdjY0wyVEFRPT0iLFtbIlRQRSIsIjIwMjYtMTEtMDciLCJJQ04iLG51bGwsIlRSIiwiODcyIl1dXQ==",
-        "price": 5967,
+        "id": "WyJDalJJUlZCZmRHNU5aVzlQU1VWQlJWSlZjbWRDUnkwdExTMHRMUzB0Y0dwaVpuUXlNMEZCUVVGQlIzRlRWekEwUWs5d01FVkJFZ1ZKVkRZd01ob0tDTG8yRUFBYUExUlhSRGdjY0k2c0FRPT0iLFtbIlRQRSIsIjIwMjYtMTEtMDciLCJJQ04iLG51bGwsIklUIiwiNjAyIl1dXQ==",
+        "price": 6970,
         "currency": "TWD",
         "validatingAirlines": [
-          "酷航"
+          "台灣虎航"
         ],
         "itineraries": [
           {
             "durationMinutes": 150,
             "segments": [
               {
-                "carrier": "酷航",
-                "number": "TR 872",
+                "carrier": "台灣虎航",
+                "number": "IT 602",
                 "from": "TPE",
-                "departureAt": "2026-11-07 18:15",
+                "departureAt": "2026-11-07 20:00",
                 "to": "ICN",
-                "arrivalAt": "2026-11-07 21:45",
+                "arrivalAt": "2026-11-07 23:30",
                 "durationMinutes": 150,
                 "travelClass": "Economy"
               }
@@ -346,17 +346,13 @@
         ]
       },
       "priceInsights": {
-        "lowest_price": 5967,
-        "price_level": "low",
+        "lowest_price": 6970,
+        "price_level": "typical",
         "typical_price_range": [
           6000,
           9300
         ],
         "price_history": [
-          [
-            1782662400,
-            6792
-          ],
           [
             1782748800,
             5856
@@ -595,18 +591,22 @@
           ],
           [
             1787846400,
-            5967
+            5965
+          ],
+          [
+            1787932800,
+            6970
           ]
         ]
       },
       "searchUrl": "https://www.google.com/travel/flights?hl=zh-tw&gl=tw&curr=TWD&tfs=CBwQAhoeEgoyMDI2LTExLTA3agcIARIDVFBFcgcIARIDSUNOGh4SCjIwMjYtMTEtMTFqBwgBEgNJQ05yBwgBEgNUUEVAAUgBcAGYAQE&tfu=EgIIAg",
-      "checkedAt": "2026-08-28T06:55:10.584Z",
+      "checkedAt": "2026-08-29T04:08:46.856Z",
       "recommendedTargetPrice": 6000,
       "estimateBasis": "google_price_range",
-      "targetHit": true,
-      "average30d": 6079,
-      "priceVsAveragePct": -1.8,
-      "changePct": 0
+      "targetHit": false,
+      "average30d": 6075,
+      "priceVsAveragePct": 14.7,
+      "changePct": 16.8
     },
     {
       "id": "tpe-bkk-20261229",
@@ -616,309 +616,56 @@
       "destinationCity": "曼谷",
       "departureDate": "2026-12-29",
       "returnDate": "2027-01-03",
-      "targetPrice": 9800,
+      "targetPrice": 8500,
       "nonStop": false,
       "source": "public",
-      "currentPrice": 11351,
+      "currentPrice": 9243,
       "currency": "TWD",
-      "offerCount": 20,
+      "offerCount": 22,
       "cheapestOffer": {
-        "id": "WyJDalJJVkRkNlRsWm5OVWhPVUd0QlJFOHhTSGRDUnkwdExTMHRMUzB0TFMxdmEzSmlNa0ZCUVVGQlIzRlNUVTVOUlhaaVpuRkJFZ3REV0RRd04zeERXRFkxTXhvS0NOZFlFQUFhQTFSWFJEZ2NjTWFZQWc9PSIsW1siVFBFIiwiMjAyNi0xMi0yOSIsIkhLRyIsbnVsbCwiQ1giLCI0MDciXSxbIkhLRyIsIjIwMjYtMTItMjkiLCJCS0siLG51bGwsIkNYIiwiNjUzIl1dXQ==",
-        "price": 11351,
+        "id": "WyJDalJJTW1WU1owMUNTbk5NYkUxQlNEZEVWbEZDUnkwdExTMHRMUzB0TFMxdmEyZHNNa0ZCUVVGQlIzRlRWekF3U2tkaVRsTkJFZ3RXVGpVM01YeFdUall3TlJvS0NKdElFQUFhQTFSWFJEZ2NjSjdrQVE9PSIsW1siVFBFIiwiMjAyNi0xMi0yOSIsIlNHTiIsbnVsbCwiVk4iLCI1NzEiXSxbIlNHTiIsIjIwMjYtMTItMjkiLCJCS0siLG51bGwsIlZOIiwiNjA1Il1dXQ==",
+        "price": 9243,
         "currency": "TWD",
         "validatingAirlines": [
-          "國泰航空"
+          "越南航空"
         ],
         "itineraries": [
           {
-            "durationMinutes": 405,
+            "durationMinutes": 385,
             "segments": [
               {
-                "carrier": "國泰航空",
-                "number": "CX 407",
+                "carrier": "越南航空",
+                "number": "VN 571",
                 "from": "TPE",
-                "departureAt": "2026-12-29 08:20",
-                "to": "HKG",
-                "arrivalAt": "2026-12-29 10:30",
-                "durationMinutes": 130,
+                "departureAt": "2026-12-29 07:45",
+                "to": "SGN",
+                "arrivalAt": "2026-12-29 10:25",
+                "durationMinutes": 220,
                 "travelClass": "Economy"
               },
               {
-                "carrier": "國泰航空",
-                "number": "CX 653",
-                "from": "HKG",
-                "departureAt": "2026-12-29 12:00",
+                "carrier": "越南航空",
+                "number": "VN 605",
+                "from": "SGN",
+                "departureAt": "2026-12-29 11:35",
                 "to": "BKK",
-                "arrivalAt": "2026-12-29 14:05",
-                "durationMinutes": 185,
+                "arrivalAt": "2026-12-29 13:10",
+                "durationMinutes": 95,
                 "travelClass": "Economy"
               }
             ]
           }
         ]
       },
-      "priceInsights": {
-        "lowest_price": 11351,
-        "price_level": "high",
-        "typical_price_range": [
-          6000,
-          9900
-        ],
-        "price_history": [
-          [
-            1782662400,
-            13723
-          ],
-          [
-            1782748800,
-            13723
-          ],
-          [
-            1782835200,
-            11394
-          ],
-          [
-            1782921600,
-            12110
-          ],
-          [
-            1783008000,
-            12109
-          ],
-          [
-            1783094400,
-            13344
-          ],
-          [
-            1783180800,
-            13578
-          ],
-          [
-            1783267200,
-            13513
-          ],
-          [
-            1783353600,
-            13111
-          ],
-          [
-            1783440000,
-            13111
-          ],
-          [
-            1783526400,
-            13190
-          ],
-          [
-            1783612800,
-            10214
-          ],
-          [
-            1783699200,
-            10233
-          ],
-          [
-            1783785600,
-            10233
-          ],
-          [
-            1783872000,
-            10233
-          ],
-          [
-            1783958400,
-            10229
-          ],
-          [
-            1784044800,
-            10232
-          ],
-          [
-            1784131200,
-            9423
-          ],
-          [
-            1784217600,
-            9421
-          ],
-          [
-            1784304000,
-            9432
-          ],
-          [
-            1784390400,
-            9432
-          ],
-          [
-            1784476800,
-            9432
-          ],
-          [
-            1784563200,
-            9465
-          ],
-          [
-            1784649600,
-            9447
-          ],
-          [
-            1784736000,
-            9806
-          ],
-          [
-            1784822400,
-            9817
-          ],
-          [
-            1784908800,
-            9798
-          ],
-          [
-            1784995200,
-            9798
-          ],
-          [
-            1785081600,
-            9798
-          ],
-          [
-            1785168000,
-            9798
-          ],
-          [
-            1785254400,
-            9809
-          ],
-          [
-            1785340800,
-            9825
-          ],
-          [
-            1785427200,
-            9828
-          ],
-          [
-            1785513600,
-            10478
-          ],
-          [
-            1785600000,
-            11470
-          ],
-          [
-            1785686400,
-            11470
-          ],
-          [
-            1785772800,
-            11440
-          ],
-          [
-            1785859200,
-            11465
-          ],
-          [
-            1785945600,
-            11470
-          ],
-          [
-            1786032000,
-            11450
-          ],
-          [
-            1786118400,
-            11441
-          ],
-          [
-            1786204800,
-            11441
-          ],
-          [
-            1786291200,
-            11441
-          ],
-          [
-            1786377600,
-            11443
-          ],
-          [
-            1786464000,
-            11439
-          ],
-          [
-            1786550400,
-            11440
-          ],
-          [
-            1786636800,
-            11434
-          ],
-          [
-            1786723200,
-            11410
-          ],
-          [
-            1786809600,
-            11410
-          ],
-          [
-            1786896000,
-            11410
-          ],
-          [
-            1786982400,
-            11382
-          ],
-          [
-            1787068800,
-            11345
-          ],
-          [
-            1787155200,
-            11351
-          ],
-          [
-            1787241600,
-            11354
-          ],
-          [
-            1787328000,
-            11358
-          ],
-          [
-            1787414400,
-            11358
-          ],
-          [
-            1787500800,
-            11358
-          ],
-          [
-            1787587200,
-            11358
-          ],
-          [
-            1787673600,
-            11354
-          ],
-          [
-            1787760000,
-            11360
-          ],
-          [
-            1787846400,
-            11351
-          ]
-        ]
-      },
+      "priceInsights": null,
       "searchUrl": "https://www.google.com/travel/flights?hl=zh-tw&gl=tw&curr=TWD&tfs=CBwQAhoeEgoyMDI2LTEyLTI5agcIARIDVFBFcgcIARIDQktLGh4SCjIwMjctMDEtMDNqBwgBEgNCS0tyBwgBEgNUUEVAAUgBcAGYAQE&tfu=EgIIAg",
-      "checkedAt": "2026-08-28T06:55:15.690Z",
-      "recommendedTargetPrice": 9800,
-      "estimateBasis": "google_price_range",
+      "checkedAt": "2026-08-29T04:08:50.645Z",
+      "recommendedTargetPrice": 8500,
+      "estimateBasis": "route_baseline",
       "targetHit": false,
-      "average30d": 9760,
-      "priceVsAveragePct": 16.3,
-      "changePct": 22.4
+      "average30d": 9817,
+      "priceVsAveragePct": -5.8,
+      "changePct": -18.6
     }
   ]
 }
