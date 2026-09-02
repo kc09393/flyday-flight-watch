@@ -478,5 +478,20 @@
     "watchId": "tpe-bkk-20261229",
     "price": 9468,
     "checkedAt": "2026-09-01T01:48:37.736Z"
+  },
+  {
+    "watchId": "tpe-nrt-20261015",
+    "price": 7765,
+    "checkedAt": "2026-09-02T01:00:47.448Z"
+  },
+  {
+    "watchId": "tpe-icn-20261107",
+    "price": 7286,
+    "checkedAt": "2026-09-02T01:00:47.448Z"
+  },
+  {
+    "watchId": "tpe-bkk-20261229",
+    "price": 11245,
+    "checkedAt": "2026-09-02T01:00:47.448Z"
   }
 ]
