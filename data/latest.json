@@ -1,7 +1,7 @@
 {
   "status": "live",
   "provider": "Google Flights via SerpApi",
-  "updatedAt": "2026-09-04T00:57:53.249Z",
+  "updatedAt": "2026-09-05T00:55:56.985Z",
   "errors": [],
   "results": [
     {
@@ -15,12 +15,12 @@
       "targetPrice": 7400,
       "nonStop": false,
       "source": "public",
-      "currentPrice": 8069,
+      "currentPrice": 8052,
       "currency": "TWD",
       "offerCount": 22,
       "cheapestOffer": {
-        "id": "WyJDalJJWVhCT1NqRTRWRlp4Um5kQlEybE5hWGRDUnkwdExTMHRMUzB0YjNsamFYVXhNMEZCUVVGQlIzRmhSalJ6UlVONFMwVkJFZ1ZVVWpnM05Cb0tDSVUvRUFBYUExUlhSRGdjY092R0FRPT0iLFtbIlRQRSIsIjIwMjYtMTAtMTUiLCJOUlQiLG51bGwsIlRSIiwiODc0Il1dXQ==",
-        "price": 8069,
+        "id": "WyJDalJJUzFBMVdXb3hWbWhmWmsxQlJWQnNVSGRDUnkwdExTMHRMUzB0TFhCcWMzUXlNMEZCUVVGQlIzRmlZVXBaVFhZdGJVZEJFZ1ZVVWpnM05Cb0tDUFErRUFBYUExUlhSRGdjY01UR0FRPT0iLFtbIlRQRSIsIjIwMjYtMTAtMTUiLCJOUlQiLG51bGwsIlRSIiwiODc0Il1dXQ==",
+        "price": 8052,
         "currency": "TWD",
         "validatingAirlines": [
           "酷航"
@@ -44,17 +44,13 @@
         ]
       },
       "priceInsights": {
-        "lowest_price": 8069,
+        "lowest_price": 8052,
         "price_level": "typical",
         "typical_price_range": [
           5900,
           9600
         ],
         "price_history": [
-          [
-            1783267200,
-            10590
-          ],
           [
             1783353600,
             10590
@@ -293,18 +289,22 @@
           ],
           [
             1788451200,
-            8069
+            8048
+          ],
+          [
+            1788537600,
+            8052
           ]
         ]
       },
       "searchUrl": "https://www.google.com/travel/flights?hl=zh-tw&gl=tw&curr=TWD&tfs=CBwQAhoeEgoyMDI2LTEwLTE1agcIARIDVFBFcgcIARIDTlJUGh4SCjIwMjYtMTAtMjBqBwgBEgNOUlRyBwgBEgNUUEVAAUgBcAGYAQE&tfu=EgIIAg",
-      "checkedAt": "2026-09-04T00:57:49.103Z",
+      "checkedAt": "2026-09-05T00:55:51.887Z",
       "recommendedTargetPrice": 7400,
       "estimateBasis": "google_price_range",
       "targetHit": false,
-      "average30d": 7750,
-      "priceVsAveragePct": 4.1,
-      "changePct": 0.9
+      "average30d": 7765,
+      "priceVsAveragePct": 3.7,
+      "changePct": -0.2
     },
     {
       "id": "tpe-icn-20261107",
@@ -317,12 +317,12 @@
       "targetPrice": 6000,
       "nonStop": false,
       "source": "public",
-      "currentPrice": 7320,
+      "currentPrice": 6798,
       "currency": "TWD",
       "offerCount": 12,
       "cheapestOffer": {
-        "id": "WyJDalJJT1d3NFZrMDFZbEpvTTI5QlFuVmxlVUZDUnkwdExTMHRMUzB0TFMwdGVXbGpOMEZCUVVGQlIzRmhSalJyUm1sWU4yOUJFZ1ZKVkRZd01ob0tDSmc1RUFBYUExUlhSRGdjY0xHMEFRPT0iLFtbIlRQRSIsIjIwMjYtMTEtMDciLCJJQ04iLG51bGwsIklUIiwiNjAyIl1dXQ==",
-        "price": 7320,
+        "id": "WyJDalJJWlhsNlJXOU1ObWQwWlVWQlNXOVFUV2RDUnkwdExTMHRMUzB0TFhscFltUmtPRUZCUVVGQlIzRmlZVXBaVFVVNUxVbEJFZ1ZKVkRZd01ob0tDSTQxRUFBYUExUlhSRGdjY002bkFRPT0iLFtbIlRQRSIsIjIwMjYtMTEtMDciLCJJQ04iLG51bGwsIklUIiwiNjAyIl1dXQ==",
+        "price": 6798,
         "currency": "TWD",
         "validatingAirlines": [
           "台灣虎航"
@@ -346,21 +346,13 @@
         ]
       },
       "priceInsights": {
-        "lowest_price": 7320,
+        "lowest_price": 6798,
         "price_level": "typical",
         "typical_price_range": [
           6000,
           9400
         ],
         "price_history": [
-          [
-            1783180800,
-            5906
-          ],
-          [
-            1783267200,
-            5894
-          ],
           [
             1783353600,
             5901
@@ -595,22 +587,26 @@
           ],
           [
             1788364800,
-            7318
+            7313
           ],
           [
             1788451200,
             7320
+          ],
+          [
+            1788537600,
+            6798
           ]
         ]
       },
       "searchUrl": "https://www.google.com/travel/flights?hl=zh-tw&gl=tw&curr=TWD&tfs=CBwQAhoeEgoyMDI2LTExLTA3agcIARIDVFBFcgcIARIDSUNOGh4SCjIwMjYtMTEtMTFqBwgBEgNJQ05yBwgBEgNUUEVAAUgBcAGYAQE&tfu=EgIIAg",
-      "checkedAt": "2026-09-04T00:57:46.096Z",
+      "checkedAt": "2026-09-05T00:55:51.630Z",
       "recommendedTargetPrice": 6000,
       "estimateBasis": "google_price_range",
       "targetHit": false,
-      "average30d": 6254,
-      "priceVsAveragePct": 17.1,
-      "changePct": 0.1
+      "average30d": 6286,
+      "priceVsAveragePct": 8.2,
+      "changePct": -7.1
     },
     {
       "id": "tpe-bkk-20261229",
@@ -620,41 +616,41 @@
       "destinationCity": "曼谷",
       "departureDate": "2026-12-29",
       "returnDate": "2027-01-03",
-      "targetPrice": 8100,
+      "targetPrice": 8700,
       "nonStop": false,
       "source": "public",
-      "currentPrice": 8825,
+      "currentPrice": 9487,
       "currency": "TWD",
-      "offerCount": 21,
+      "offerCount": 20,
       "cheapestOffer": {
-        "id": "WyJDalJJTUZWSU5XUnJlVW8yT1d0QlFYazRjbWRDUnkwdExTMHRMWFozWm5NeU5TMXVNa0ZCUVVGQlIzRmhSalJ2UVRGcWFsTkJFZ3RXVGpVM01YeFdUall3TnhvS0NQbEVFQUFhQTFSWFJEZ2NjTHpaQVE9PSIsW1siVFBFIiwiMjAyNi0xMi0yOSIsIlNHTiIsbnVsbCwiVk4iLCI1NzEiXSxbIlNHTiIsIjIwMjYtMTItMjkiLCJCS0siLG51bGwsIlZOIiwiNjA3Il1dXQ==",
-        "price": 8825,
+        "id": "WyJDalJJZDNGeGExY3pRV2hHYkdOQlEwOVJNMEZDUnkwdExTMHRMUzB0TFMxMmQzaHBPVUZCUVVGQlIzRmlZVXBaVDJoWmNIVkJFZ3RXVGpVM09YeFdUall4TlJvS0NJOUtFQUFhQTFSWFJEZ2NjUFhwQVE9PSIsW1siVFBFIiwiMjAyNi0xMi0yOSIsIkhBTiIsbnVsbCwiVk4iLCI1NzkiXSxbIkhBTiIsIjIwMjYtMTItMjkiLCJCS0siLG51bGwsIlZOIiwiNjE1Il1dXQ==",
+        "price": 9487,
         "currency": "TWD",
         "validatingAirlines": [
           "越南航空"
         ],
         "itineraries": [
           {
-            "durationMinutes": 705,
+            "durationMinutes": 490,
             "segments": [
               {
                 "carrier": "越南航空",
-                "number": "VN 571",
+                "number": "VN 579",
                 "from": "TPE",
-                "departureAt": "2026-12-29 07:45",
-                "to": "SGN",
-                "arrivalAt": "2026-12-29 10:25",
-                "durationMinutes": 220,
+                "departureAt": "2026-12-29 07:35",
+                "to": "HAN",
+                "arrivalAt": "2026-12-29 09:50",
+                "durationMinutes": 195,
                 "travelClass": "Economy"
               },
               {
                 "carrier": "越南航空",
-                "number": "VN 607",
-                "from": "SGN",
-                "departureAt": "2026-12-29 16:55",
+                "number": "VN 615",
+                "from": "HAN",
+                "departureAt": "2026-12-29 12:35",
                 "to": "BKK",
-                "arrivalAt": "2026-12-29 18:30",
-                "durationMinutes": 95,
+                "arrivalAt": "2026-12-29 14:45",
+                "durationMinutes": 130,
                 "travelClass": "Economy"
               }
             ]
@@ -663,13 +659,13 @@
       },
       "priceInsights": null,
       "searchUrl": "https://www.google.com/travel/flights?hl=zh-tw&gl=tw&curr=TWD&tfs=CBwQAhoeEgoyMDI2LTEyLTI5agcIARIDVFBFcgcIARIDQktLGh4SCjIwMjctMDEtMDNqBwgBEgNCS0tyBwgBEgNUUEVAAUgBcAGYAQE&tfu=EgIIAg",
-      "checkedAt": "2026-09-04T00:57:52.398Z",
-      "recommendedTargetPrice": 8100,
+      "checkedAt": "2026-09-05T00:55:56.985Z",
+      "recommendedTargetPrice": 8700,
       "estimateBasis": "route_baseline",
       "targetHit": false,
-      "average30d": 9971,
-      "priceVsAveragePct": -11.5,
-      "changePct": -21.5
+      "average30d": 9976,
+      "priceVsAveragePct": -4.9,
+      "changePct": 7.5
     }
   ]
 }
