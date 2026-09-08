@@ -1,7 +1,7 @@
 {
   "status": "partial",
   "provider": "Google Flights via SerpApi",
-  "updatedAt": "2026-09-07T00:59:40.887Z",
+  "updatedAt": "2026-09-08T01:10:30.997Z",
   "errors": [
     "TPE-NRT search failed (429): Your account has run out of searches.",
     "TPE-ICN search failed (429): Your account has run out of searches.",
