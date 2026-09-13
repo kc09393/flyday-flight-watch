@@ -1,7 +1,7 @@
 {
   "status": "live",
   "provider": "Google Flights via SerpApi",
-  "updatedAt": "2026-09-12T01:05:07.089Z",
+  "updatedAt": "2026-09-13T00:58:20.038Z",
   "errors": [],
   "results": [
     {
@@ -15,12 +15,12 @@
       "targetPrice": 7300,
       "nonStop": false,
       "source": "public",
-      "currentPrice": 7920,
+      "currentPrice": 7949,
       "currency": "TWD",
       "offerCount": 22,
       "cheapestOffer": {
-        "id": "WyJDalJJUWpaMGJWVnNSVVJ4V1RSQlFtTXRXbEZDUnkwdExTMHRMUzF2YTNkNk9DMXVNVUZCUVVGQlIzRnJjRlZGUmkwMUxUQkJFZ1ZVVWpnM05Cb0tDUEE5RUFBYUExUlhSRGdjY01YREFRPT0iLFtbIlRQRSIsIjIwMjYtMTAtMTUiLCJOUlQiLG51bGwsIlRSIiwiODc0Il1dXQ==",
-        "price": 7920,
+        "id": "WyJDalJJWnpsemJXWnlXVlpUT1RCQlRVb3dOVkZDUnkwdExTMHRMUzB0TFc5clptNHlNVUZCUVVGQlIzRnNPVk52U1d4VldEQkJFZ1ZVVWpnM05Cb0tDSTArRUFBYUExUlhSRGdjY0tERUFRPT0iLFtbIlRQRSIsIjIwMjYtMTAtMTUiLCJOUlQiLG51bGwsIlRSIiwiODc0Il1dXQ==",
+        "price": 7949,
         "currency": "TWD",
         "validatingAirlines": [
           "酷航"
@@ -44,17 +44,13 @@
         ]
       },
       "priceInsights": {
-        "lowest_price": 7920,
+        "lowest_price": 7949,
         "price_level": "typical",
         "typical_price_range": [
           6100,
           9900
         ],
         "price_history": [
-          [
-            1783958400,
-            8637
-          ],
           [
             1784044800,
             11116
@@ -293,18 +289,22 @@
           ],
           [
             1789142400,
-            7920
+            7915
+          ],
+          [
+            1789228800,
+            7949
           ]
         ]
       },
       "searchUrl": "https://www.google.com/travel/flights?hl=zh-tw&gl=tw&curr=TWD&tfs=CBwQAhoeEgoyMDI2LTEwLTE1agcIARIDVFBFcgcIARIDTlJUGh4SCjIwMjYtMTAtMjBqBwgBEgNOUlRyBwgBEgNUUEVAAUgBcAGYAQE&tfu=EgIIAg",
-      "checkedAt": "2026-09-12T01:05:06.411Z",
+      "checkedAt": "2026-09-13T00:58:20.037Z",
       "recommendedTargetPrice": 7300,
       "estimateBasis": "google_price_range",
       "targetHit": false,
-      "average30d": 7839,
-      "priceVsAveragePct": 1,
-      "changePct": -2.1
+      "average30d": 7850,
+      "priceVsAveragePct": 1.3,
+      "changePct": 0.4
     },
     {
       "id": "tpe-icn-20261107",
@@ -321,7 +321,7 @@
       "currency": "TWD",
       "offerCount": 12,
       "cheapestOffer": {
-        "id": "WyJDalJJZUdKNFFVRkNNRWR5TldkQlJDMVVWV2RDUnkwdExTMHRMUzB0TFMxd2FuTnZOVUZCUVVGQlIzRnJjRlZGUjNBMVFrOUJFZ1ZKVkRZd01ob0tDTG8zRUFBYUExUlhSRGdjY0ordkFRPT0iLFtbIlRQRSIsIjIwMjYtMTEtMDciLCJJQ04iLG51bGwsIklUIiwiNjAyIl1dXQ==",
+        "id": "WyJDalJJTmtOWlUyMVplbEZmU1dOQlNEVnhZVkZDUnkwdExTMHRMUzB0TFhaMGVHVXlOMEZCUVVGQlIzRnNPVk5yUzFFdGQwMUJFZ1ZKVkRZd01ob0tDTG8zRUFBYUExUlhSRGdjY0ordkFRPT0iLFtbIlRQRSIsIjIwMjYtMTEtMDciLCJJQ04iLG51bGwsIklUIiwiNjAyIl1dXQ==",
         "price": 7098,
         "currency": "TWD",
         "validatingAirlines": [
@@ -353,10 +353,6 @@
           9400
         ],
         "price_history": [
-          [
-            1783872000,
-            5956
-          ],
           [
             1783958400,
             5986
@@ -591,7 +587,7 @@
           ],
           [
             1788969600,
-            6798
+            6938
           ],
           [
             1789056000,
@@ -600,17 +596,21 @@
           [
             1789142400,
             7098
+          ],
+          [
+            1789228800,
+            7098
           ]
         ]
       },
       "searchUrl": "https://www.google.com/travel/flights?hl=zh-tw&gl=tw&curr=TWD&tfs=CBwQAhoeEgoyMDI2LTExLTA3agcIARIDVFBFcgcIARIDSUNOGh4SCjIwMjYtMTEtMTFqBwgBEgNJQ05yBwgBEgNUUEVAAUgBcAGYAQE&tfu=EgIIAg",
-      "checkedAt": "2026-09-12T01:05:06.165Z",
+      "checkedAt": "2026-09-13T00:58:18.355Z",
       "recommendedTargetPrice": 6000,
       "estimateBasis": "google_price_range",
       "targetHit": false,
-      "average30d": 6367,
-      "priceVsAveragePct": 11.5,
-      "changePct": 2.4
+      "average30d": 6392,
+      "priceVsAveragePct": 11,
+      "changePct": 0
     },
     {
       "id": "tpe-bkk-20261229",
@@ -623,12 +623,12 @@
       "targetPrice": 9800,
       "nonStop": false,
       "source": "public",
-      "currentPrice": 12264,
+      "currentPrice": 11229,
       "currency": "TWD",
-      "offerCount": 17,
+      "offerCount": 18,
       "cheapestOffer": {
-        "id": "WyJDalJJVFRoeFkxQTJhVU4yZVd0QlJubEZNWGRDUnkwdExTMHRMWFozYUdreE1DMXVNVUZCUVVGQlIzRnJjRlZGVEdodWNFVkJFZ3REV0RRd04zeERXRFkxTXhvS0NPaGZFQUFhQTFSWFJEZ2NjT1N1QWc9PSIsW1siVFBFIiwiMjAyNi0xMi0yOSIsIkhLRyIsbnVsbCwiQ1giLCI0MDciXSxbIkhLRyIsIjIwMjYtMTItMjkiLCJCS0siLG51bGwsIkNYIiwiNjUzIl1dXQ==",
-        "price": 12264,
+        "id": "WyJDalJJTkV3NWVuSkxPV3hPUlRCQlExVkZZbmRDUnkwdExTMHRMUzB0TFhaM1ltb3lNa0ZCUVVGQlIzRnNPVk5yVGtkM1lUUkJFZ3REV0RRd04zeERXRFkxTXhvS0NOMVhFQUFhQTFSWFJEZ2NjSjZWQWc9PSIsW1siVFBFIiwiMjAyNi0xMi0yOSIsIkhLRyIsbnVsbCwiQ1giLCI0MDciXSxbIkhLRyIsIjIwMjYtMTItMjkiLCJCS0siLG51bGwsIkNYIiwiNjUzIl1dXQ==",
+        "price": 11229,
         "currency": "TWD",
         "validatingAirlines": [
           "國泰航空"
@@ -662,17 +662,13 @@
         ]
       },
       "priceInsights": {
-        "lowest_price": 12264,
+        "lowest_price": 11229,
         "price_level": "high",
         "typical_price_range": [
           6000,
           9900
         ],
         "price_history": [
-          [
-            1783958400,
-            10229
-          ],
           [
             1784044800,
             10232
@@ -911,18 +907,22 @@
           ],
           [
             1789142400,
-            12264
+            11229
+          ],
+          [
+            1789228800,
+            11229
           ]
         ]
       },
       "searchUrl": "https://www.google.com/travel/flights?hl=zh-tw&gl=tw&curr=TWD&tfs=CBwQAhoeEgoyMDI2LTEyLTI5agcIARIDVFBFcgcIARIDQktLGh4SCjIwMjctMDEtMDNqBwgBEgNCS0tyBwgBEgNUUEVAAUgBcAGYAQE&tfu=EgIIAg",
-      "checkedAt": "2026-09-12T01:05:06.167Z",
+      "checkedAt": "2026-09-13T00:58:18.330Z",
       "recommendedTargetPrice": 9800,
       "estimateBasis": "google_price_range",
       "targetHit": false,
-      "average30d": 9888,
-      "priceVsAveragePct": 24,
-      "changePct": 29.8
+      "average30d": 9991,
+      "priceVsAveragePct": 12.4,
+      "changePct": -8.4
     }
   ]
 }
